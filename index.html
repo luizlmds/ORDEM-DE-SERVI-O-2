@@ -966,9 +966,17 @@
       centroCusto: 'centro_custo',
       dataConclusao: 'data_conclusao',
     };
+    const camposData = ['abertura', 'previsao', 'data_conclusao'];
     const saida = {};
     Object.keys(campos).forEach(k => {
-      saida[mapa[k] || k] = campos[k];
+      const chave = mapa[k] || k;
+      let valor = campos[k];
+      // colunas do tipo "date" no Postgres não aceitam texto vazio, só uma
+      // data válida ou null — então convertemos "" para null aqui
+      if(camposData.includes(chave) && valor === ''){
+        valor = null;
+      }
+      saida[chave] = valor;
     });
     return saida;
   }
