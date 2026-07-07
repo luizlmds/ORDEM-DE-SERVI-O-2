@@ -6,10 +6,10 @@
 <title>Sistema de OS · Parente Andrade</title>
 <style>
   :root{
-    --verde:#619935;
-    --verde-dark:#4d7a2a;
-    --verde-light:#eaf2e2;
-    --laranja:#EAA837;
+    --verde:#0f5c53;
+    --verde-dark:#0a3f39;
+    --verde-light:#e3efed;
+    --laranja:#eaa837;
     --laranja-dark:#c98d24;
     --laranja-light:#fdf1dd;
     --azul:#3b6ea5;
@@ -29,34 +29,49 @@
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
   body{
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     background: var(--cinza-100);
     color: var(--preto);
     -webkit-font-smoothing:antialiased;
   }
-  button, input, select, textarea{ font-family: Arial, Helvetica, sans-serif; }
+  button, input, select, textarea{ font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
 
   /* ---------- HEADER ---------- */
   header.topbar{
-    background: var(--branco);
-    border-bottom: 3px solid var(--verde);
+    background: linear-gradient(90deg, var(--verde-dark), var(--verde));
+    border-bottom: none;
+    box-shadow: 0 4px 0 var(--laranja);
     display:flex;
     align-items:center;
     justify-content:space-between;
-    padding: 12px 24px;
+    padding: 14px 28px;
     gap:16px;
     flex-wrap:wrap;
   }
   .brand{ display:flex; align-items:center; gap:14px; }
-  .brand img{ height:44px; width:auto; display:block; }
-  .brand .divider{ width:1px; height:34px; background:var(--cinza-200); }
+  .brand img{ height:40px; width:auto; display:block; filter: brightness(0) invert(1); }
+  .brand .divider{ width:1px; height:30px; background:rgba(255,255,255,.35); }
   .brand .titles h1{
-    font-size:16px; font-weight:700; letter-spacing:.3px; margin:0;
-    color:var(--preto);
+    font-size:15px; font-weight:800; letter-spacing:.5px; margin:0;
+    color:var(--branco); text-transform:uppercase;
   }
   .brand .titles p{
-    font-size:12px; color:var(--cinza-600); margin:2px 0 0 0;
+    font-size:12px; color:rgba(255,255,255,.75); margin:2px 0 0 0;
   }
+  .header-user{ display:flex; align-items:center; gap:14px; color:var(--branco); font-size:13.5px; }
+  .header-user .sair{
+    width:34px; height:34px; border-radius:8px; display:flex; align-items:center; justify-content:center;
+    background:rgba(255,255,255,.12); color:var(--branco); border:none; cursor:pointer;
+  }
+  .header-user .sair:hover{ background:rgba(255,255,255,.22); }
+  .breadcrumb{
+    display:flex; align-items:center; gap:8px; padding:12px 28px; font-size:13px; color:var(--cinza-600);
+    background:var(--branco); border-bottom:1px solid var(--cinza-200);
+  }
+  .breadcrumb a{ color:var(--verde); text-decoration:none; font-weight:600; }
+  .breadcrumb a:hover{ text-decoration:underline; }
+  .breadcrumb .sep{ color:var(--cinza-400); }
+  .breadcrumb .atual{ color:var(--cinza-400); }
   .btn-nova{
     background: var(--laranja);
     color: var(--preto);
@@ -159,13 +174,13 @@
   table{ width:100%; border-collapse:collapse; }
   thead th{
     text-align:left;
-    font-size:11px;
+    font-size:11.5px;
     text-transform:uppercase;
     letter-spacing:.5px;
-    color:var(--cinza-600);
-    background:var(--cinza-100);
-    padding:12px 14px;
-    border-bottom:1px solid var(--cinza-200);
+    color:var(--branco);
+    background:var(--verde);
+    padding:14px;
+    border-bottom:none;
     white-space:nowrap;
   }
   tbody td{
@@ -357,13 +372,14 @@
     width:26px; height:26px; margin-left:6px; font-size:13px; flex-shrink:0;
   }
   .foto-badge:hover{ background:#dbe8f4; }
-  .equip-cell{ display:flex; align-items:center; gap:2px; flex-wrap:wrap; }
+  .equip-cell{ display:flex; align-items:center; justify-content:center; gap:2px; flex-wrap:wrap; }
 
   /* details modal */
-  .detail-row{ display:flex; justify-content:space-between; gap:16px; padding:10px 0; border-bottom:1px solid var(--cinza-100); font-size:13.5px;}
-  .detail-row:last-child{ border-bottom:none; }
-  .detail-row .k{ color:var(--cinza-600); font-weight:700; min-width:150px;}
-  .detail-row .v{ text-align:right; font-weight:600; }
+  .detail-grid{ display:grid; grid-template-columns:1fr 1fr; gap:16px 28px; }
+  .detail-row{ display:flex; flex-direction:column; gap:4px; padding:6px 0 10px 0; border-bottom:1px solid var(--cinza-200); font-size:13.5px;}
+  .detail-row.full{ grid-column:1 / -1; }
+  .detail-row .k{ color:var(--cinza-600); font-weight:700; font-size:11.5px; text-transform:uppercase; letter-spacing:.3px; }
+  .detail-row .v{ text-align:left; font-weight:600; color:var(--preto); }
   .detail-desc{ background:var(--cinza-100); border-radius:8px; padding:12px 14px; font-size:13.5px; line-height:1.5; margin-top:6px;}
   .foto-carregando{ color:var(--cinza-600); font-size:12.5px; font-style:italic; }
 
@@ -387,9 +403,33 @@
     table thead{ display:none; }
     table, tbody, tr, td{ display:block; width:100%; }
     tbody tr{ border-bottom:8px solid var(--cinza-100); padding:8px 0; }
-    tbody td{ display:flex; justify-content:space-between; align-items:center; border-bottom:none; padding:6px 14px;}
+    tbody td{ display:flex; justify-content:center; align-items:center; border-bottom:none; padding:6px 14px;}
     tbody td::before{ content: attr(data-label); font-weight:700; color:var(--cinza-600); font-size:11px; text-transform:uppercase;}
   }
+
+  /* ===== CENTRALIZAÇÃO GERAL ===== */
+  body, table, thead th, tbody td, .field label, .field input, .field select, .field textarea,
+  .detail-row, .detail-row .k, .detail-row .v, .toolbar, .solicitacao-topo, .solicitacao-topo p,
+  .menu-cards, .btn-menu-card .texto, .empty-state, .modal-header, .modal-footer,
+  footer.rodape, .stat-card, .toast, .brand .titles, .breadcrumb, .menu-saudacao,
+  .foto-upload, .foto-preview-wrap, .detail-desc {
+    text-align: center;
+  }
+  header.topbar{ justify-content:space-between; }
+  .brand{ justify-content:flex-start; }
+  .brand .titles, .brand .titles h1, .brand .titles p{ text-align:left; }
+  .header-user{ justify-content:flex-end; }
+  .toolbar{ justify-content:center; }
+  .breadcrumb{ justify-content:center; }
+  .btn-menu-card{ justify-content:center; }
+  .btn-menu-card .texto{ align-items:center; }
+  .modal-footer{ justify-content:center; }
+  .solicitacao-rodape{ justify-content:center; }
+  .detail-row{ align-items:center; }
+  .form-grid .field{ display:flex; flex-direction:column; align-items:center; }
+  .field input, .field select, .field textarea{ text-align:center; }
+  .foto-upload{ align-items:center; }
+  .foto-acoes{ align-items:center; }
 </style>
 </head>
 <body>
@@ -400,11 +440,21 @@
     <div class="divider"></div>
     <div class="titles">
       <h1>ORDEM DE SERVIÇO</h1>
-      <p>Parente Andrade</p>
     </div>
   </div>
-  <button class="btn-secundario btn-header-toggle" id="btnToggleView" style="display:none;">🔧 Área do Técnico</button>
+  <div class="header-user">
+    <span id="headerSaudacao"></span>
+    <button class="btn-secundario btn-header-toggle" id="btnToggleView" style="display:none;">🔧 Área do Técnico</button>
+  </div>
 </header>
+
+<div class="breadcrumb" id="breadcrumbBar" style="display:none;">
+  <span>🏠</span>
+  <span class="sep">›</span>
+  <a href="#" id="breadcrumbInicio">Início</a>
+  <span class="sep">›</span>
+  <span class="atual" id="breadcrumbAtual">Visualização</span>
+</div>
 
 <!-- VIEW: LOGIN (E-MAIL CORPORATIVO) -->
 <main class="view-solicitacao" id="viewLogin">
@@ -502,7 +552,7 @@
       </div>
       <div class="field">
         <label>Centro de custo</label>
-        <input type="text" id="sCentroCusto" placeholder="Ex: Administrativo, Obra 01...">
+        <input type="text" id="sCentroCusto" inputmode="numeric" pattern="[0-9]*" maxlength="4" placeholder="Ex: 0000">
       </div>
       <div class="field">
         <label>Técnico</label>
@@ -648,7 +698,7 @@
           </div>
           <div class="field">
             <label>Centro de custo</label>
-            <input type="text" id="fCentroCusto" placeholder="Ex: Administrativo, Obra 01...">
+            <input type="text" id="fCentroCusto" inputmode="numeric" pattern="[0-9]*" maxlength="4" placeholder="Ex: 0000">
           </div>
           <div class="field full">
             <label>Equipamento / Serviço <span class="req">*</span></label>
@@ -817,6 +867,12 @@
       const diferenca = e.target.value.length - tamanhoAntes;
       const novaPosicao = Math.max(0, posicaoAntes + diferenca);
       e.target.setSelectionRange(novaPosicao, novaPosicao);
+    });
+  }
+
+  function aplicarSomenteNumeros(inputEl){
+    inputEl.addEventListener('input', (e) => {
+      e.target.value = e.target.value.replace(/\D/g, '').slice(0, 4);
     });
   }
 
@@ -1234,19 +1290,21 @@
     const os = ordens.find(o => o.id === id);
     if(!os) return;
     const html = `
+    <div class="detail-grid">
       <div class="detail-row"><div class="k">Número</div><div class="v">${os.numero}</div></div>
       <div class="detail-row"><div class="k">Solicitante</div><div class="v">${escapeHTML(os.solicitante)}</div></div>
       <div class="detail-row"><div class="k">Telefone</div><div class="v">${escapeHTML(os.telefone) || '—'}</div></div>
       <div class="detail-row"><div class="k">Centro de custo</div><div class="v">${escapeHTML(os.centroCusto) || '—'}</div></div>
       <div class="detail-row"><div class="k">Técnico</div><div class="v">${escapeHTML(os.tecnico) || '—'}</div></div>
-      <div class="detail-row"><div class="k">Equipamento / Serviço</div><div class="v">${escapeHTML(os.equipamento)}</div></div>
+      <div class="detail-row full"><div class="k">Equipamento / Serviço</div><div class="v">${escapeHTML(os.equipamento)}</div></div>
       <div class="detail-row"><div class="k">Prioridade</div><div class="v">${prioridadeLabel[os.prioridade]}</div></div>
       <div class="detail-row"><div class="k">Status</div><div class="v">${statusLabel[os.status]}</div></div>
       <div class="detail-row"><div class="k">Abertura</div><div class="v">${formatDataBR(os.abertura)}</div></div>
       <div class="detail-row"><div class="k">Previsão</div><div class="v">${formatDataBR(os.previsao)}</div></div>
       ${os.dataConclusao ? `<div class="detail-row"><div class="k">Concluída em</div><div class="v" style="color:var(--verde-dark);">✅ ${formatDataBR(os.dataConclusao)}</div></div>` : ''}
-      ${os.descricao ? `<div class="detail-row" style="display:block;"><div class="k" style="margin-bottom:6px;">Descrição</div><div class="detail-desc">${escapeHTML(os.descricao)}</div></div>` : ''}
-      ${os.temFoto ? `<div class="detail-row" style="display:block;"><div class="k" style="margin-bottom:6px;">Foto do serviço</div><img src="${os.fotoUrl}" alt="Foto do serviço" style="max-width:100%;border-radius:10px;border:1px solid var(--cinza-200);cursor:pointer;" id="imgDetalheFoto"></div>` : ''}
+      ${os.descricao ? `<div class="detail-row full"><div class="k">Descrição</div><div class="detail-desc">${escapeHTML(os.descricao)}</div></div>` : ''}
+      ${os.temFoto ? `<div class="detail-row full"><div class="k">Foto do serviço</div><img src="${os.fotoUrl}" alt="Foto do serviço" style="max-width:100%;border-radius:10px;border:1px solid var(--cinza-200);cursor:pointer;" id="imgDetalheFoto"></div>` : ''}
+    </div>
     `;
     $('#corpoDetalhe').innerHTML = html;
     const imgDetalhe = $('#imgDetalheFoto');
@@ -1419,6 +1477,16 @@
     $('#viewMinhasOS').style.display = view === 'minhasOS' ? 'block' : 'none';
     $('#viewTecnico').style.display = view === 'tecnico' ? 'block' : 'none';
     $('#btnToggleView').textContent = view === 'tecnico' ? '← Voltar' : '🔧 Área do Técnico';
+    const rotulos = { menu:'Menu', solicitacao:'Nova OS', minhasOS:'Minhas OS', tecnico:'Área do Técnico' };
+    const bar = $('#breadcrumbBar');
+    if(view === 'menu'){
+      bar.style.display = 'none';
+    } else {
+      bar.style.display = 'flex';
+      $('#breadcrumbAtual').textContent = rotulos[view] || '';
+    }
+    const emailAtual = sessionStorage.getItem(CHAVE_SESSAO_LOGIN) || '';
+    $('#headerSaudacao').textContent = emailAtual ? ('Olá, ' + emailAtual.split('@')[0]) : '';
     if(view === 'menu'){
       const email = sessionStorage.getItem(CHAVE_SESSAO_LOGIN) || '';
       $('#menuEmailTexto').textContent = email ? ('Conectado como ' + email) : '';
@@ -1430,6 +1498,7 @@
     if(view === 'minhasOS') renderizarMinhasOS();
   }
 
+  $('#breadcrumbInicio').addEventListener('click', (e) => { e.preventDefault(); mostrarView('menu'); });
   $('#btnIrNovaOS').addEventListener('click', () => mostrarView('solicitacao'));
   $('#btnIrMinhasOS').addEventListener('click', () => mostrarView('minhasOS'));
   $('#btnVoltarMenuMinhasOS').addEventListener('click', () => mostrarView('menu'));
@@ -1573,6 +1642,8 @@
 
   aplicarMascaraTelefone($('#sTelefone'));
   aplicarMascaraTelefone($('#fTelefone'));
+  aplicarSomenteNumeros($('#sCentroCusto'));
+  aplicarSomenteNumeros($('#fCentroCusto'));
 
   if(conferirLoginExistente()){
     mostrarView('menu');
