@@ -477,6 +477,7 @@
   </div>
   <div class="header-user">
     <span id="headerSaudacao"></span>
+    <button class="sair" id="btnSair" title="Sair" style="display:none;">🚪</button>
     <button class="btn-secundario btn-header-toggle" id="btnToggleView" style="display:none;">🔧 Área do Técnico</button>
   </div>
 </header>
@@ -537,6 +538,7 @@
 <main class="view-tecnico" id="viewMinhasOS" style="display:none;">
   <div class="tecnico-topo">
     <button class="btn-secundario" id="btnVoltarMenuMinhasOS">← Voltar ao menu</button>
+    <button class="btn-secundario" id="btnAtualizarMinhasOS">🔄 Atualizar</button>
   </div>
   <div class="table-wrap">
     <table id="tabelaMinhasOS">
@@ -640,6 +642,7 @@
 <div class="tecnico-topo">
   <div style="display:flex; gap:10px; flex-wrap:wrap;">
     <button class="btn-nova" id="btnNovaOS">+ Nova OS</button>
+    <button class="btn-secundario" id="btnAtualizarTecnico">🔄 Atualizar</button>
     <button class="btn-secundario" id="btnIrManutencao">⚙️ Manutenção</button>
     <button class="btn-secundario" id="btnEmitirRelatorio">🖨️ Emitir Relatório</button>
   </div>
@@ -1162,6 +1165,12 @@
       ordens = [];
     }
     renderizar();
+  }
+
+  async function atualizarTudo(){
+    await carregar();
+    if(viewAtual === 'minhasOS') renderizarMinhasOS();
+    toast('Dados atualizados');
   }
 
   async function criarOrdemRemota(camposSnake){
@@ -1738,9 +1747,10 @@
       $('#loginEmailInput').select();
       return;
     }
-    sessionStorage.setItem(CHAVE_SESSAO_LOGIN, email.toLowerCase());
+    localStorage.setItem(CHAVE_SESSAO_LOGIN, email.toLowerCase());
     $('#viewLogin').style.display = 'none';
     $('#btnToggleView').style.display = '';
+    $('#btnSair').style.display = '';
     mostrarView('menu');
   }
 
@@ -1752,11 +1762,28 @@
     $('#loginErro').style.display = 'none';
   });
 
+  function sair(){
+    if(!confirm('Deseja realmente sair do sistema?')) return;
+    localStorage.removeItem(CHAVE_SESSAO_LOGIN);
+    $('#btnToggleView').style.display = 'none';
+    $('#btnSair').style.display = 'none';
+    $('#viewMenu').style.display = 'none';
+    $('#viewSolicitacao').style.display = 'none';
+    $('#viewMinhasOS').style.display = 'none';
+    $('#viewTecnico').style.display = 'none';
+    $('#viewManutencao').style.display = 'none';
+    $('#breadcrumbBar').style.display = 'none';
+    $('#loginEmailInput').value = '';
+    $('#viewLogin').style.display = 'flex';
+  }
+  $('#btnSair').addEventListener('click', sair);
+
   function conferirLoginExistente(){
-    const emailSalvo = sessionStorage.getItem(CHAVE_SESSAO_LOGIN);
+    const emailSalvo = localStorage.getItem(CHAVE_SESSAO_LOGIN);
     if(emailSalvo && emailValido(emailSalvo)){
       $('#viewLogin').style.display = 'none';
       $('#btnToggleView').style.display = '';
+      $('#btnSair').style.display = '';
       return true;
     }
     return false;
@@ -1783,14 +1810,14 @@
       bar.style.display = 'flex';
       $('#breadcrumbAtual').textContent = rotulos[view] || '';
     }
-    const emailAtual = sessionStorage.getItem(CHAVE_SESSAO_LOGIN) || '';
+    const emailAtual = localStorage.getItem(CHAVE_SESSAO_LOGIN) || '';
     $('#headerSaudacao').textContent = emailAtual ? ('Olá, ' + emailAtual.split('@')[0]) : '';
     if(view === 'menu'){
-      const email = sessionStorage.getItem(CHAVE_SESSAO_LOGIN) || '';
+      const email = localStorage.getItem(CHAVE_SESSAO_LOGIN) || '';
       $('#menuEmailTexto').textContent = email ? ('Conectado como ' + email) : '';
     }
     if(view === 'solicitacao'){
-      $('#sEmailSolicitante').value = sessionStorage.getItem(CHAVE_SESSAO_LOGIN) || '';
+      $('#sEmailSolicitante').value = localStorage.getItem(CHAVE_SESSAO_LOGIN) || '';
       popularSelects();
     }
     if(view === 'tecnico') renderizar();
@@ -1799,6 +1826,8 @@
   }
 
   $('#btnIrManutencao').addEventListener('click', () => mostrarView('manutencao'));
+  $('#btnAtualizarTecnico').addEventListener('click', atualizarTudo);
+  $('#btnAtualizarMinhasOS').addEventListener('click', atualizarTudo);
   $('#btnEmitirRelatorio').addEventListener('click', emitirRelatorio);
   $('#btnVoltarMenuManutencao').addEventListener('click', () => mostrarView('tecnico'));
   $('#btnAddCC').addEventListener('click', adicionarCC);
@@ -1814,7 +1843,7 @@
   $('#btnVoltarMenuSolicitacao').addEventListener('click', () => mostrarView('menu'));
 
   function renderizarMinhasOS(){
-    const emailAtual = (sessionStorage.getItem(CHAVE_SESSAO_LOGIN) || '').toLowerCase();
+    const emailAtual = (localStorage.getItem(CHAVE_SESSAO_LOGIN) || '').toLowerCase();
     const minhas = ordens.filter(o => (o.emailSolicitante || '').toLowerCase() === emailAtual);
     const corpo = $('#corpoMinhasOS');
     corpo.innerHTML = '';
@@ -1907,7 +1936,7 @@
       prioridade: $('#sPrioridade').value,
       status: 'aberta',
       previsao: '',
-      emailSolicitante: sessionStorage.getItem(CHAVE_SESSAO_LOGIN) || '',
+      emailSolicitante: localStorage.getItem(CHAVE_SESSAO_LOGIN) || '',
     };
     try{
       const abertura = new Date().toISOString().slice(0,10);
