@@ -211,6 +211,29 @@
   .status-select.st-concluida{ background:var(--verde-light); color:var(--verde-dark); }
   .status-select.st-cancelada{ background:var(--vermelho-light); color:var(--vermelho); }
 
+  .badge-status{ display:inline-block; padding:5px 12px; border-radius:20px; font-size:11.5px; font-weight:700; }
+  .badge-status.st-aberta{ background:var(--laranja-light); color:var(--laranja-dark); }
+  .badge-status.st-andamento{ background:var(--azul-light); color:var(--azul); }
+  .badge-status.st-concluida{ background:var(--verde-light); color:var(--verde-dark); }
+  .badge-status.st-cancelada{ background:var(--vermelho-light); color:var(--vermelho); }
+
+  .menu-cards{ display:flex; flex-direction:column; gap:14px; margin-top:8px; }
+  .btn-menu-card{
+    display:flex; align-items:center; gap:16px; text-align:left; width:100%;
+    background:var(--cinza-100); border:1px solid var(--cinza-200); border-radius:12px;
+    padding:18px 20px; cursor:pointer; transition: background .15s ease, border-color .15s ease;
+    font-family:inherit;
+  }
+  .btn-menu-card:hover{ background:var(--verde-light); border-color:var(--verde); }
+  .btn-menu-card .icone{
+    font-size:24px; flex-shrink:0; width:48px; height:48px; display:flex; align-items:center;
+    justify-content:center; background:var(--branco); border-radius:10px; box-shadow:var(--sombra);
+  }
+  .btn-menu-card .texto{ display:flex; flex-direction:column; gap:3px; }
+  .btn-menu-card .texto strong{ font-size:15px; color:var(--preto); }
+  .btn-menu-card .texto small{ font-size:12.5px; color:var(--cinza-600); }
+  .menu-saudacao{ font-size:12.5px; color:var(--cinza-600); margin-top:-6px; margin-bottom:4px; }
+
   .acoes{ display:flex; gap:6px; }
   .btn-concluir{
     border:1.5px solid var(--cinza-200); background:var(--branco); color:var(--cinza-900);
@@ -380,13 +403,88 @@
       <p>Parente Andrade</p>
     </div>
   </div>
-  <button class="btn-secundario btn-header-toggle" id="btnToggleView">🔧 Área do Técnico</button>
+  <button class="btn-secundario btn-header-toggle" id="btnToggleView" style="display:none;">🔧 Área do Técnico</button>
 </header>
 
+<!-- VIEW: LOGIN (E-MAIL CORPORATIVO) -->
+<main class="view-solicitacao" id="viewLogin">
+  <div class="solicitacao-card" style="max-width:400px;">
+    <div class="solicitacao-topo">
+      <h2>Acesso ao Sistema</h2>
+      <p>Entre com seu e-mail corporativo para continuar.</p>
+    </div>
+    <div class="form-grid">
+      <div class="field full">
+        <label>E-mail corporativo <span class="req">*</span></label>
+        <input type="email" id="loginEmailInput" required placeholder="seunome@parenteandrade.com.br">
+      </div>
+      <div id="loginErro" style="color:var(--vermelho); font-size:12.5px; display:none;">Use seu e-mail corporativo (@parenteandrade.com.br).</div>
+    </div>
+    <div class="solicitacao-rodape">
+      <button class="btn-primario" id="btnEntrarLogin">Entrar</button>
+    </div>
+  </div>
+</main>
+
+<!-- VIEW: MENU DO COLABORADOR (APÓS LOGIN) -->
+<main class="view-solicitacao" id="viewMenu" style="display:none;">
+  <div class="solicitacao-card" style="max-width:480px;">
+    <div class="solicitacao-topo">
+      <h2>Bem-vindo(a)</h2>
+      <p class="menu-saudacao" id="menuEmailTexto"></p>
+    </div>
+    <div class="menu-cards">
+      <button type="button" class="btn-menu-card" id="btnIrNovaOS">
+        <span class="icone">📝</span>
+        <span class="texto">
+          <strong>Nova OS</strong>
+          <small>Abrir uma nova solicitação de serviço</small>
+        </span>
+      </button>
+      <button type="button" class="btn-menu-card" id="btnIrMinhasOS">
+        <span class="icone">📋</span>
+        <span class="texto">
+          <strong>Acompanhar minha OS</strong>
+          <small>Ver o status das solicitações que você enviou</small>
+        </span>
+      </button>
+    </div>
+  </div>
+</main>
+
+<!-- VIEW: MINHAS OS (COLABORADOR ACOMPANHA SUAS PRÓPRIAS SOLICITAÇÕES) -->
+<main class="view-tecnico" id="viewMinhasOS" style="display:none;">
+  <div class="tecnico-topo">
+    <button class="btn-secundario" id="btnVoltarMenuMinhasOS">← Voltar ao menu</button>
+  </div>
+  <div class="table-wrap">
+    <table id="tabelaMinhasOS">
+      <thead>
+        <tr>
+          <th>Nº OS</th>
+          <th>Equipamento / Serviço</th>
+          <th>Prioridade</th>
+          <th>Status</th>
+          <th>Abertura</th>
+          <th>Previsão</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody id="corpoMinhasOS"></tbody>
+    </table>
+    <div class="empty-state" id="estadoVazioMinhasOS" style="display:none;">
+      <div class="mark">OS</div>
+      <h3>Você ainda não enviou nenhuma solicitação</h3>
+      <p>Suas solicitações vão aparecer aqui assim que forem enviadas.</p>
+    </div>
+  </div>
+</main>
+
 <!-- VIEW: SOLICITAÇÃO (COLABORADOR) -->
-<main class="view-solicitacao" id="viewSolicitacao">
+<main class="view-solicitacao" id="viewSolicitacao" style="display:none;">
   <div class="solicitacao-card">
     <div class="solicitacao-topo">
+      <button type="button" class="btn-secundario" id="btnVoltarMenuSolicitacao" style="margin-bottom:14px;">← Voltar ao menu</button>
       <h2>Abrir nova Ordem de Serviço</h2>
     </div>
     <div class="form-grid">
@@ -759,6 +857,7 @@
       dataConclusao: linha.data_conclusao,
       fotoUrl: linha.foto_url || null,
       temFoto: !!linha.foto_url,
+      emailSolicitante: linha.email_solicitante || '',
     };
   }
 
@@ -1020,6 +1119,7 @@
     const mapa = {
       centroCusto: 'centro_custo',
       dataConclusao: 'data_conclusao',
+      emailSolicitante: 'email_solicitante',
     };
     const camposData = ['abertura', 'previsao', 'data_conclusao'];
     const saida = {};
@@ -1264,23 +1364,96 @@
     });
   }
 
-  // ---------- ALTERNÂNCIA DE VIEWS: SOLICITAÇÃO x ÁREA DO TÉCNICO ----------
+  // ---------- LOGIN (E-MAIL CORPORATIVO) ----------
+  const DOMINIO_PERMITIDO = '@parenteandrade.com.br';
+  const CHAVE_SESSAO_LOGIN = 'os_login_email';
+
+  function emailValido(email){
+    return email.trim().toLowerCase().endsWith(DOMINIO_PERMITIDO);
+  }
+
+  function entrarComEmail(){
+    const email = $('#loginEmailInput').value.trim();
+    if(!emailValido(email)){
+      $('#loginErro').style.display = 'block';
+      $('#loginEmailInput').select();
+      return;
+    }
+    sessionStorage.setItem(CHAVE_SESSAO_LOGIN, email.toLowerCase());
+    $('#viewLogin').style.display = 'none';
+    $('#btnToggleView').style.display = '';
+    mostrarView('menu');
+  }
+
+  $('#btnEntrarLogin').addEventListener('click', entrarComEmail);
+  $('#loginEmailInput').addEventListener('keydown', (e) => {
+    if(e.key === 'Enter'){ e.preventDefault(); entrarComEmail(); }
+  });
+  $('#loginEmailInput').addEventListener('input', () => {
+    $('#loginErro').style.display = 'none';
+  });
+
+  function conferirLoginExistente(){
+    const emailSalvo = sessionStorage.getItem(CHAVE_SESSAO_LOGIN);
+    if(emailSalvo && emailValido(emailSalvo)){
+      $('#viewLogin').style.display = 'none';
+      $('#btnToggleView').style.display = '';
+      return true;
+    }
+    return false;
+  }
+
+  // ---------- ALTERNÂNCIA DE VIEWS: MENU x SOLICITAÇÃO x MINHAS OS x ÁREA DO TÉCNICO ----------
   // senha de acesso à Área do Técnico (fica só aqui no código, não aparece em lugar nenhum da tela)
   const SENHA_TECNICO = '0';
-  let viewAtual = 'solicitacao';
+  let viewAtual = 'menu';
 
   function mostrarView(view){
     viewAtual = view;
-    if(view === 'tecnico'){
-      $('#viewSolicitacao').style.display = 'none';
-      $('#viewTecnico').style.display = 'block';
-      $('#btnToggleView').textContent = '← Nova Solicitação';
-      renderizar();
-    } else {
-      $('#viewTecnico').style.display = 'none';
-      $('#viewSolicitacao').style.display = 'flex';
-      $('#btnToggleView').textContent = '🔧 Área do Técnico';
+    $('#viewMenu').style.display = view === 'menu' ? 'flex' : 'none';
+    $('#viewSolicitacao').style.display = view === 'solicitacao' ? 'flex' : 'none';
+    $('#viewMinhasOS').style.display = view === 'minhasOS' ? 'block' : 'none';
+    $('#viewTecnico').style.display = view === 'tecnico' ? 'block' : 'none';
+    $('#btnToggleView').textContent = view === 'tecnico' ? '← Voltar' : '🔧 Área do Técnico';
+    if(view === 'menu'){
+      const email = sessionStorage.getItem(CHAVE_SESSAO_LOGIN) || '';
+      $('#menuEmailTexto').textContent = email ? ('Conectado como ' + email) : '';
     }
+    if(view === 'tecnico') renderizar();
+    if(view === 'minhasOS') renderizarMinhasOS();
+  }
+
+  $('#btnIrNovaOS').addEventListener('click', () => mostrarView('solicitacao'));
+  $('#btnIrMinhasOS').addEventListener('click', () => mostrarView('minhasOS'));
+  $('#btnVoltarMenuMinhasOS').addEventListener('click', () => mostrarView('menu'));
+  $('#btnVoltarMenuSolicitacao').addEventListener('click', () => mostrarView('menu'));
+
+  function renderizarMinhasOS(){
+    const emailAtual = (sessionStorage.getItem(CHAVE_SESSAO_LOGIN) || '').toLowerCase();
+    const minhas = ordens.filter(o => (o.emailSolicitante || '').toLowerCase() === emailAtual);
+    const corpo = $('#corpoMinhasOS');
+    corpo.innerHTML = '';
+    const semResultado = minhas.length === 0;
+    $('#estadoVazioMinhasOS').style.display = semResultado ? 'block' : 'none';
+    $('#tabelaMinhasOS').style.display = semResultado ? 'none' : 'table';
+    minhas.forEach(os => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td data-label="Nº OS"><span class="os-num">${os.numero}</span></td>
+        <td data-label="Equipamento / Serviço">${escapeHTML(os.equipamento)}</td>
+        <td data-label="Prioridade"><span class="badge pri-${os.prioridade}">${prioridadeLabel[os.prioridade]}</span></td>
+        <td data-label="Status"><span class="badge-status st-${os.status}">${statusLabel[os.status]}</span></td>
+        <td data-label="Abertura">${formatDataBR(os.abertura)}</td>
+        <td data-label="Previsão">${formatDataBR(os.previsao)}</td>
+        <td data-label="Ações">
+          <button class="icon-btn" title="Ver detalhes" data-acao="ver" data-id="${os.id}">👁</button>
+        </td>
+      `;
+      corpo.appendChild(tr);
+    });
+    corpo.querySelectorAll('[data-acao="ver"]').forEach(btn => {
+      btn.addEventListener('click', (e) => abrirDetalhe(Number(e.currentTarget.dataset.id)));
+    });
   }
 
   function abrirModalSenha(){
@@ -1313,10 +1486,10 @@
   });
 
   $('#btnToggleView').addEventListener('click', () => {
-    if(viewAtual === 'solicitacao'){
-      abrirModalSenha();
+    if(viewAtual === 'tecnico'){
+      mostrarView('menu');
     } else {
-      mostrarView('solicitacao');
+      abrirModalSenha();
     }
   });
 
@@ -1349,6 +1522,7 @@
       prioridade: $('#sPrioridade').value,
       status: 'aberta',
       previsao: '',
+      emailSolicitante: sessionStorage.getItem(CHAVE_SESSAO_LOGIN) || '',
     };
     try{
       const abertura = new Date().toISOString().slice(0,10);
@@ -1357,6 +1531,7 @@
       await salvarFotoDaOS(novaOS, fotoForm);
       limparFormSolicitacao();
       toast('Solicitação ' + novaOS.numero + ' enviada com sucesso!');
+      mostrarView('menu');
     }catch(e){
       console.error('Erro ao enviar solicitação', e);
       toast('Não foi possível enviar sua solicitação. Verifique sua conexão e tente novamente.');
@@ -1392,7 +1567,9 @@
   aplicarMascaraTelefone($('#sTelefone'));
   aplicarMascaraTelefone($('#fTelefone'));
 
-  mostrarView('solicitacao');
+  if(conferirLoginExistente()){
+    mostrarView('menu');
+  }
   carregar();
 })();
 </script>
