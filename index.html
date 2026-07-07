@@ -1714,14 +1714,15 @@
 </body>
 </html>`;
 
-    const janela = window.open('', '_blank');
+    const blob = new Blob([html], { type: 'text/html' });
+    const blobUrl = URL.createObjectURL(blob);
+    const janela = window.open(blobUrl, '_blank');
     if(!janela){
       toast('Permita pop-ups no navegador para emitir o relatório');
+      URL.revokeObjectURL(blobUrl);
       return;
     }
-    janela.document.open();
-    janela.document.write(html);
-    janela.document.close();
+    setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
   }
   const DOMINIO_PERMITIDO = '@parenteandrade.com.br';
   const CHAVE_SESSAO_LOGIN = 'os_login_email';
