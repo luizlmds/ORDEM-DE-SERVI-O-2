@@ -123,6 +123,12 @@
   .tecnico-topo::before{
     content:"Área do Técnico"; font-size:15px; font-weight:800; color:var(--preto);
   }
+  #viewManutencao .tecnico-topo::before{
+    content:"Manutenção";
+  }
+  #viewMinhasOS .tecnico-topo::before{
+    content:"Acompanhar minha OS";
+  }
 
   /* ---------- STATS ---------- */
   .stats{
@@ -394,7 +400,34 @@
   .toast.show{ opacity:1; transform:translateY(0); }
 
   footer.rodape{
-    text-align:center; padding:18px; font-size:11.5px; color:var(--cinza-400);
+    text-align: center; padding:18px; font-size:11.5px; color:var(--cinza-400);
+  }
+
+  /* ---------- MANUTENÇÃO (CC / TÉCNICOS) ---------- */
+  .manutencao-grid{
+    display:grid; grid-template-columns:1fr 1fr; gap:20px;
+    padding: 20px 24px 24px 24px;
+  }
+  .manutencao-card{
+    background:var(--branco); border-radius:12px; box-shadow:var(--sombra);
+    padding:20px 22px;
+  }
+  .manutencao-card h3{ font-size:15px; font-weight:800; margin:0 0 6px 0; color:var(--preto); }
+  .manutencao-desc{ font-size:12.5px; color:var(--cinza-600); margin:0 0 14px 0; line-height:1.5; }
+  .manutencao-form{ display:flex; gap:10px; margin-bottom:14px; }
+  .manutencao-form input{
+    flex:1; padding:10px 12px; border:1px solid var(--cinza-200); border-radius:8px;
+    font-size:13.5px; color:var(--preto); background:var(--branco);
+  }
+  .manutencao-form input:focus{ outline:2px solid var(--verde); outline-offset:1px; border-color:var(--verde); }
+  .manutencao-lista{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px; }
+  .manutencao-lista li{
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    background:var(--cinza-100); border-radius:8px; padding:9px 12px; font-size:13.5px; font-weight:600;
+  }
+  .manutencao-vazio{ font-size:12.5px; color:var(--cinza-600); text-align:center; padding:10px 0; }
+  @media (max-width: 900px){
+    .manutencao-grid{ grid-template-columns:1fr; }
   }
 
   @media (max-width: 900px){
@@ -485,14 +518,12 @@
     </div>
     <div class="menu-cards">
       <button type="button" class="btn-menu-card" id="btnIrNovaOS">
-        <span class="icone">📝</span>
         <span class="texto">
           <strong>Nova OS</strong>
           <small>Abrir uma nova solicitação de serviço</small>
         </span>
       </button>
       <button type="button" class="btn-menu-card" id="btnIrMinhasOS">
-        <span class="icone">📋</span>
         <span class="texto">
           <strong>Acompanhar minha OS</strong>
           <small>Ver o status das solicitações que você enviou</small>
@@ -552,11 +583,15 @@
       </div>
       <div class="field">
         <label>Centro de custo</label>
-        <input type="text" id="sCentroCusto" inputmode="numeric" pattern="[0-9]*" maxlength="4" placeholder="Ex: 0000">
+        <select id="sCentroCusto">
+          <option value="">Selecione o centro de custo</option>
+        </select>
       </div>
       <div class="field">
         <label>Técnico</label>
-        <input type="text" id="sTecnico" placeholder="Nome do técnico responsável">
+        <select id="sTecnico">
+          <option value="">Selecione o técnico</option>
+        </select>
       </div>
       <div class="field full">
         <label>Equipamento / Serviço <span class="req">*</span></label>
@@ -603,7 +638,11 @@
 <main class="view-tecnico" id="viewTecnico" style="display:none;">
 
 <div class="tecnico-topo">
-  <button class="btn-nova" id="btnNovaOS">+ Nova OS</button>
+  <div style="display:flex; gap:10px; flex-wrap:wrap;">
+    <button class="btn-nova" id="btnNovaOS">+ Nova OS</button>
+    <button class="btn-secundario" id="btnIrManutencao">⚙️ Manutenção</button>
+    <button class="btn-secundario" id="btnEmitirRelatorio">🖨️ Emitir Relatório</button>
+  </div>
 </div>
 
 <section class="stats">
@@ -675,6 +714,39 @@
 
 </main>
 
+<!-- VIEW: MANUTENÇÃO (CADASTRO DE CENTROS DE CUSTO E TÉCNICOS) -->
+<main class="view-tecnico" id="viewManutencao" style="display:none;">
+
+<div class="tecnico-topo">
+  <button class="btn-secundario" id="btnVoltarMenuManutencao">← Voltar</button>
+</div>
+
+<div class="manutencao-grid">
+  <div class="manutencao-card">
+    <h3>Centros de Custo</h3>
+    <p class="manutencao-desc">Cadastre os códigos de centro de custo (ex: 0000) que ficarão disponíveis no formulário.</p>
+    <div class="manutencao-form">
+      <input type="text" id="novoCC" inputmode="numeric" pattern="[0-9]*" maxlength="4" placeholder="Ex: 0000">
+      <button type="button" class="btn-primario" id="btnAddCC">+ Adicionar</button>
+    </div>
+    <ul class="manutencao-lista" id="listaCC"></ul>
+    <p class="manutencao-vazio" id="vazioCC" style="display:none;">Nenhum centro de custo cadastrado.</p>
+  </div>
+
+  <div class="manutencao-card">
+    <h3>Técnicos</h3>
+    <p class="manutencao-desc">Cadastre os nomes dos técnicos disponíveis para atendimento.</p>
+    <div class="manutencao-form">
+      <input type="text" id="novoTecnico" placeholder="Nome do técnico">
+      <button type="button" class="btn-primario" id="btnAddTecnico">+ Adicionar</button>
+    </div>
+    <ul class="manutencao-lista" id="listaTecnicos"></ul>
+    <p class="manutencao-vazio" id="vazioTecnicos" style="display:none;">Nenhum técnico cadastrado.</p>
+  </div>
+</div>
+
+</main>
+
 <footer class="rodape">Parente Andrade &middot; Sistema interno de Ordens de Serviço</footer>
 
 <!-- MODAL: NOVA / EDITAR OS -->
@@ -698,7 +770,9 @@
           </div>
           <div class="field">
             <label>Centro de custo</label>
-            <input type="text" id="fCentroCusto" inputmode="numeric" pattern="[0-9]*" maxlength="4" placeholder="Ex: 0000">
+            <select id="fCentroCusto">
+              <option value="">Selecione o centro de custo</option>
+            </select>
           </div>
           <div class="field full">
             <label>Equipamento / Serviço <span class="req">*</span></label>
@@ -748,7 +822,9 @@
             <div class="form-grid" style="grid-template-columns:1fr 1fr; gap:14px;">
               <div class="field" style="margin:0;">
                 <label>Técnico responsável</label>
-                <input type="text" id="fTecnico" placeholder="Nome do técnico">
+                <select id="fTecnico">
+                  <option value="">Selecione o técnico</option>
+                </select>
               </div>
               <div class="field" style="margin:0;">
                 <label>Previsão de entrega</label>
@@ -836,6 +912,137 @@
     t.textContent = msg;
     t.classList.add('show');
     setTimeout(()=> t.classList.remove('show'), 2200);
+  }
+
+  // ---------- MANUTENÇÃO: CENTROS DE CUSTO E TÉCNICOS ----------
+  const CHAVE_CCS = 'os_manutencao_ccs';
+  const CHAVE_TECNICOS = 'os_manutencao_tecnicos';
+
+  function carregarCCs(){
+    try{ return JSON.parse(localStorage.getItem(CHAVE_CCS)) || []; }catch(e){ return []; }
+  }
+  function salvarCCs(lista){ localStorage.setItem(CHAVE_CCS, JSON.stringify(lista)); }
+
+  function carregarTecnicos(){
+    try{ return JSON.parse(localStorage.getItem(CHAVE_TECNICOS)) || []; }catch(e){ return []; }
+  }
+  function salvarTecnicos(lista){ localStorage.setItem(CHAVE_TECNICOS, JSON.stringify(lista)); }
+
+  function renderizarManutencao(){
+    const ccs = carregarCCs();
+    const tecnicos = carregarTecnicos();
+
+    const listaCC = $('#listaCC');
+    listaCC.innerHTML = '';
+    $('#vazioCC').style.display = ccs.length === 0 ? 'block' : 'none';
+    ccs.forEach((cc, i) => {
+      const li = document.createElement('li');
+      li.innerHTML = `<span>${escapeHTML(cc)}</span><button type="button" class="icon-btn danger" data-tipo="cc" data-i="${i}">🗑</button>`;
+      listaCC.appendChild(li);
+    });
+
+    const listaTecnicos = $('#listaTecnicos');
+    listaTecnicos.innerHTML = '';
+    $('#vazioTecnicos').style.display = tecnicos.length === 0 ? 'block' : 'none';
+    tecnicos.forEach((nome, i) => {
+      const li = document.createElement('li');
+      li.innerHTML = `<span>${escapeHTML(nome)}</span><button type="button" class="icon-btn danger" data-tipo="tecnico" data-i="${i}">🗑</button>`;
+      listaTecnicos.appendChild(li);
+    });
+
+    listaCC.querySelectorAll('[data-tipo="cc"]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const i = Number(e.currentTarget.dataset.i);
+        const lista = carregarCCs();
+        lista.splice(i, 1);
+        salvarCCs(lista);
+        renderizarManutencao();
+        popularSelects();
+      });
+    });
+    listaTecnicos.querySelectorAll('[data-tipo="tecnico"]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const i = Number(e.currentTarget.dataset.i);
+        const lista = carregarTecnicos();
+        lista.splice(i, 1);
+        salvarTecnicos(lista);
+        renderizarManutencao();
+        popularSelects();
+      });
+    });
+  }
+
+  function definirValorSelect(sel, valor){
+    if(!sel) return;
+    valor = valor || '';
+    if(valor && !Array.from(sel.options).some(o => o.value === valor)){
+      const opt = document.createElement('option');
+      opt.value = valor;
+      opt.textContent = valor;
+      sel.appendChild(opt);
+    }
+    sel.value = valor;
+  }
+
+  function popularSelects(){
+    const ccs = carregarCCs();
+    const tecnicos = carregarTecnicos();
+
+    [$('#sCentroCusto'), $('#fCentroCusto')].forEach(sel => {
+      if(!sel) return;
+      const valorAtual = sel.value;
+      sel.innerHTML = '<option value="">Selecione o centro de custo</option>' +
+        ccs.map(cc => `<option value="${escapeHTML(cc)}">${escapeHTML(cc)}</option>`).join('');
+      sel.value = valorAtual;
+    });
+
+    [$('#sTecnico'), $('#fTecnico')].forEach(sel => {
+      if(!sel) return;
+      const valorAtual = sel.value;
+      sel.innerHTML = '<option value="">Selecione o técnico</option>' +
+        tecnicos.map(nome => `<option value="${escapeHTML(nome)}">${escapeHTML(nome)}</option>`).join('');
+      sel.value = valorAtual;
+    });
+  }
+
+  function adicionarCC(){
+    const input = $('#novoCC');
+    const valor = input.value.trim();
+    if(!/^\d{1,4}$/.test(valor)){
+      toast('Informe um centro de custo numérico (ex: 0000)');
+      return;
+    }
+    const lista = carregarCCs();
+    if(lista.includes(valor)){
+      toast('Este centro de custo já está cadastrado');
+      return;
+    }
+    lista.push(valor);
+    salvarCCs(lista);
+    input.value = '';
+    renderizarManutencao();
+    popularSelects();
+    toast('Centro de custo adicionado');
+  }
+
+  function adicionarTecnico(){
+    const input = $('#novoTecnico');
+    const valor = input.value.trim();
+    if(!valor){
+      toast('Informe o nome do técnico');
+      return;
+    }
+    const lista = carregarTecnicos();
+    if(lista.some(n => n.toLowerCase() === valor.toLowerCase())){
+      toast('Este técnico já está cadastrado');
+      return;
+    }
+    lista.push(valor);
+    salvarTecnicos(lista);
+    input.value = '';
+    renderizarManutencao();
+    popularSelects();
+    toast('Técnico adicionado');
   }
 
   function esperar(ms){ return new Promise(resolve => setTimeout(resolve, ms)); }
@@ -1146,6 +1353,7 @@
   function abrirModalNova(){
     editandoId = null;
     limparForm();
+    popularSelects();
     $('#tituloModal').textContent = 'Nova Ordem de Serviço';
     $('#overlayForm').classList.add('open');
     $('#fSolicitante').focus();
@@ -1155,11 +1363,12 @@
     const os = ordens.find(o => o.id === id);
     if(!os) return;
     editandoId = id;
+    popularSelects();
     $('#osId').value = os.id;
     $('#fSolicitante').value = os.solicitante;
     $('#fTelefone').value = os.telefone || '';
-    $('#fCentroCusto').value = os.centroCusto || '';
-    $('#fTecnico').value = os.tecnico || '';
+    definirValorSelect($('#fCentroCusto'), os.centroCusto);
+    definirValorSelect($('#fTecnico'), os.tecnico);
     $('#fEquipamento').value = os.equipamento;
     $('#fDescricao').value = os.descricao || '';
     $('#fPrioridade').value = os.prioridade;
@@ -1426,7 +1635,94 @@
     });
   }
 
-  // ---------- LOGIN (E-MAIL CORPORATIVO) ----------
+  // ---------- EMISSÃO DE RELATÓRIO (PAPEL TIMBRADO) ----------
+  function emitirRelatorio(){
+    const lista = aplicarFiltros(ordens);
+    const logoEl = document.querySelector('.brand img');
+    const logoSrc = logoEl ? logoEl.src : '';
+    const agora = new Date();
+    const dataEmissao = agora.toLocaleDateString('pt-BR') + ' às ' + agora.toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' });
+
+    const linhas = lista.map(os => `
+      <tr>
+        <td>${escapeHTML(os.numero)}</td>
+        <td>${escapeHTML(os.solicitante)}</td>
+        <td>${escapeHTML(os.equipamento)}</td>
+        <td>${escapeHTML(os.centroCusto) || '—'}</td>
+        <td>${escapeHTML(os.tecnico) || '—'}</td>
+        <td>${prioridadeLabel[os.prioridade] || '—'}</td>
+        <td>${statusLabel[os.status] || '—'}</td>
+        <td>${formatDataBR(os.abertura)}</td>
+        <td>${formatDataBR(os.previsao)}</td>
+        <td>${os.dataConclusao ? formatDataBR(os.dataConclusao) : '—'}</td>
+      </tr>
+    `).join('');
+
+    const html = `<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Relatório de Ordens de Serviço</title>
+<style>
+  @page{ size:A4 landscape; margin:14mm 12mm 20mm 12mm; }
+  *{ box-sizing:border-box; }
+  body{ font-family:"Segoe UI", Arial, Helvetica, sans-serif; color:#1a1a1a; margin:0; }
+  header{ display:flex; align-items:center; gap:16px; border-bottom:4px solid #eaa837; padding-bottom:12px; margin-bottom:10px; }
+  header img{ height:52px; width:auto; }
+  header .tit h1{ font-size:18px; margin:0; color:#0a3f39; letter-spacing:.3px; }
+  header .tit p{ font-size:12px; margin:2px 0 0 0; color:#555; }
+  .meta{ display:flex; justify-content:space-between; font-size:11.5px; color:#555; margin-bottom:14px; }
+  table{ width:100%; border-collapse:collapse; font-size:10.5px; }
+  th{ background:#0f5c53; color:#fff; text-align:left; padding:7px 8px; text-transform:uppercase; letter-spacing:.3px; font-size:9px; }
+  td{ padding:6px 8px; border-bottom:1px solid #ddd; }
+  tr:nth-child(even) td{ background:#f5f6f4; }
+  .rodape-timbrado{ margin-top:22px; padding-top:10px; border-top:1px solid #ccc; font-size:9.5px; color:#666; text-align:center; line-height:1.6; }
+  @media print{
+    .rodape-timbrado{ position:fixed; bottom:0; left:0; right:0; }
+  }
+</style>
+</head>
+<body>
+  <header>
+    ${logoSrc ? `<img src="${logoSrc}" alt="Parente Andrade">` : ''}
+    <div class="tit">
+      <h1>RELATÓRIO DE ORDENS DE SERVIÇO</h1>
+      <p>Parente Andrade Ltda.</p>
+    </div>
+  </header>
+  <div class="meta">
+    <span>Emitido em: ${dataEmissao}</span>
+    <span>Total de registros: ${lista.length}</span>
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th>Nº OS</th><th>Solicitante</th><th>Equipamento / Serviço</th><th>Centro de Custo</th><th>Técnico</th><th>Prioridade</th><th>Status</th><th>Abertura</th><th>Previsão</th><th>Conclusão</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${linhas || '<tr><td colspan="10" style="text-align:center; padding:20px;">Nenhuma OS encontrada para os filtros aplicados.</td></tr>'}
+    </tbody>
+  </table>
+  <div class="rodape-timbrado">
+    Certificada nas NBR&rsquo;s ISO 9001, ISO 14001 &amp; ISO 45001<br>
+    Rua Nebraska, 202 &ndash; Bet&acirc;nia &ndash; Manaus (AM) CEP: 69073-310 &middot; Tel.: (0xx92) 3211-5555 &middot; www.parenteandrade.com.br
+  </div>
+  <script>
+    window.onload = function(){ setTimeout(function(){ window.print(); }, 350); };
+  <\/script>
+</body>
+</html>`;
+
+    const janela = window.open('', '_blank');
+    if(!janela){
+      toast('Permita pop-ups no navegador para emitir o relatório');
+      return;
+    }
+    janela.document.open();
+    janela.document.write(html);
+    janela.document.close();
+  }
   const DOMINIO_PERMITIDO = '@parenteandrade.com.br';
   const CHAVE_SESSAO_LOGIN = 'os_login_email';
 
@@ -1476,8 +1772,9 @@
     $('#viewSolicitacao').style.display = view === 'solicitacao' ? 'flex' : 'none';
     $('#viewMinhasOS').style.display = view === 'minhasOS' ? 'block' : 'none';
     $('#viewTecnico').style.display = view === 'tecnico' ? 'block' : 'none';
+    $('#viewManutencao').style.display = view === 'manutencao' ? 'block' : 'none';
     $('#btnToggleView').textContent = view === 'tecnico' ? '← Voltar' : '🔧 Área do Técnico';
-    const rotulos = { menu:'Menu', solicitacao:'Nova OS', minhasOS:'Minhas OS', tecnico:'Área do Técnico' };
+    const rotulos = { menu:'Menu', solicitacao:'Nova OS', minhasOS:'Minhas OS', tecnico:'Área do Técnico', manutencao:'Manutenção' };
     const bar = $('#breadcrumbBar');
     if(view === 'menu'){
       bar.style.display = 'none';
@@ -1493,10 +1790,21 @@
     }
     if(view === 'solicitacao'){
       $('#sEmailSolicitante').value = sessionStorage.getItem(CHAVE_SESSAO_LOGIN) || '';
+      popularSelects();
     }
     if(view === 'tecnico') renderizar();
     if(view === 'minhasOS') renderizarMinhasOS();
+    if(view === 'manutencao') renderizarManutencao();
   }
+
+  $('#btnIrManutencao').addEventListener('click', () => mostrarView('manutencao'));
+  $('#btnEmitirRelatorio').addEventListener('click', emitirRelatorio);
+  $('#btnVoltarMenuManutencao').addEventListener('click', () => mostrarView('tecnico'));
+  $('#btnAddCC').addEventListener('click', adicionarCC);
+  $('#btnAddTecnico').addEventListener('click', adicionarTecnico);
+  $('#novoCC').addEventListener('keydown', (e) => { if(e.key === 'Enter'){ e.preventDefault(); adicionarCC(); } });
+  $('#novoTecnico').addEventListener('keydown', (e) => { if(e.key === 'Enter'){ e.preventDefault(); adicionarTecnico(); } });
+  $('#novoCC').addEventListener('input', (e) => { e.target.value = e.target.value.replace(/\D/g, '').slice(0, 4); });
 
   $('#breadcrumbInicio').addEventListener('click', (e) => { e.preventDefault(); mostrarView('menu'); });
   $('#btnIrNovaOS').addEventListener('click', () => mostrarView('solicitacao'));
@@ -1642,8 +1950,7 @@
 
   aplicarMascaraTelefone($('#sTelefone'));
   aplicarMascaraTelefone($('#fTelefone'));
-  aplicarSomenteNumeros($('#sCentroCusto'));
-  aplicarSomenteNumeros($('#fCentroCusto'));
+  popularSelects();
 
   if(conferirLoginExistente()){
     mostrarView('menu');
