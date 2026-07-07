@@ -640,13 +640,12 @@
 <script>
 (function(){
   // =========================================================================
-  // CONFIGURAÇÃO DO BACKEND (Google Apps Script + Google Sheets)
+  // CONFIGURAÇÃO DO BACKEND (Supabase)
   // =========================================================================
-  // IMPORTANTE: troque a URL abaixo pela URL do seu Web App do Google Apps
-  // Script (veja instruções completas no arquivo AppsScript-Code-API.gs).
-  // Depois de configurar, suba este arquivo (com a URL já preenchida)
-  // no GitHub Pages (ou outro serviço de hospedagem de sua preferência).
-  const API_URL = 'https://script.google.com/macros/s/AKfycbxP_519GcsPuNfZmfYxRaD9FdJNfsauakSGowTiLVcNbQD8HA_5JBokIR8Izc0mHYk0/exec';
+  // IMPORTANTE: troque os dois valores abaixo pelos do SEU projeto Supabase.
+  // Veja o passo a passo completo no arquivo "Configurar-Supabase.md".
+  const SUPABASE_URL = 'https://xvxguddikupbjjbxtdaw.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh2eGd1ZGRpa3VwYmpqYnh0ZGF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzOTI1MzUsImV4cCI6MjA5ODk2ODUzNX0.NTAx-F2PHEqtaUiI3I9A6m0sz4cCTWVWgFlN2GbTQTg';
 
   let ordens = [];
   let editandoId = null;
@@ -673,33 +672,45 @@
   const statusLabel = { aberta:'Aberta', andamento:'Em andamento', concluida:'Concluída', cancelada:'Cancelada' };
   const prioridadeLabel = { baixa:'Baixa', media:'Média', alta:'Alta', urgente:'Urgente' };
 
-  // faz uma chamada ao backend (Google Apps Script). Usa Content-Type text/plain
-  // de propósito, para evitar que o navegador dispare uma requisição de
-  // pré-verificação (preflight) que o Apps Script não responde corretamente.
-  async function chamarAPI(payload){
-    if(!API_URL || API_URL.indexOf('COLOQUE_AQUI') !== -1){
-      throw new Error('A URL do backend (Google Apps Script) ainda não foi configurada neste arquivo. Veja as instruções no início do arquivo AppsScript-Code.gs.');
-    }
-    const resposta = await fetch(API_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify(payload)
-    });
-    if(!resposta.ok){
-      throw new Error('Falha de comunicação com o servidor (HTTP ' + resposta.status + ')');
-    }
-    const dados = await resposta.json();
-    if(dados && dados.erro){
-      throw new Error(dados.erro);
-    }
-    return dados;
+  function configuradoOk(){
+    return SUPABASE_URL && SUPABASE_ANON_KEY
+      && SUPABASE_URL.indexOf('COLOQUE_AQUI') === -1
+      && SUPABASE_ANON_KEY.indexOf('COLOQUE_AQUI') === -1;
   }
 
-  // mesma chamada acima, mas com novas tentativas automáticas em caso de falha transitória
-  async function chamarAPIComTentativas(payload, maxTentativas = 3){
+  function headersSupabase(extra){
+    return Object.assign({
+      'apikey': SUPABASE_ANON_KEY,
+      'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+      'Content-Type': 'application/json',
+    }, extra || {});
+  }
+
+  // converte a linha do banco (nomes com underscore) para o formato usado no sistema
+  function linhaParaOS(linha){
+    return {
+      id: linha.id,
+      numero: linha.numero,
+      solicitante: linha.solicitante,
+      telefone: linha.telefone || '',
+      centroCusto: linha.centro_custo || '',
+      tecnico: linha.tecnico || '',
+      equipamento: linha.equipamento,
+      descricao: linha.descricao || '',
+      prioridade: linha.prioridade,
+      status: linha.status,
+      abertura: linha.abertura,
+      previsao: linha.previsao || '',
+      dataConclusao: linha.data_conclusao,
+      fotoUrl: linha.foto_url || null,
+      temFoto: !!linha.foto_url,
+    };
+  }
+
+  async function chamarComTentativas(fn, maxTentativas = 3){
     for(let tentativa = 1; tentativa <= maxTentativas; tentativa++){
       try{
-        return await chamarAPI(payload);
+        return await fn();
       }catch(e){
         console.error('Erro na comunicação com o servidor (tentativa ' + tentativa + ' de ' + maxTentativas + ')', e);
         if(tentativa === maxTentativas) throw e;
@@ -709,9 +720,21 @@
   }
 
   async function carregar(){
+    if(!configuradoOk()){
+      toast('O sistema ainda não foi configurado (falta a URL/chave do Supabase no arquivo).');
+      ordens = [];
+      renderizar();
+      return;
+    }
     try{
-      const dados = await chamarAPIComTentativas({ acao: 'listar' });
-      ordens = (dados && dados.ordens) || [];
+      const linhas = await chamarComTentativas(async () => {
+        const resp = await fetch(`${SUPABASE_URL}/rest/v1/ordens?select=*&order=id.desc`, {
+          headers: headersSupabase()
+        });
+        if(!resp.ok) throw new Error('HTTP ' + resp.status);
+        return resp.json();
+      });
+      ordens = linhas.map(linhaParaOS);
     }catch(e){
       console.error('Erro ao carregar dados', e);
       toast('Não foi possível carregar os dados. Verifique sua conexão e a configuração do sistema.');
@@ -720,25 +743,76 @@
     renderizar();
   }
 
-  // busca a foto de uma OS no backend (fica salva no Google Drive, não no navegador)
-  async function obterFoto(id){
-    try{
-      const dados = await chamarAPIComTentativas({ acao: 'obterFoto', id });
-      return dados && dados.dataUrl ? dados.dataUrl : null;
-    }catch(e){
-      console.error('Erro ao obter foto', e);
-      return null;
-    }
+  async function criarOrdemRemota(camposSnake){
+    return chamarComTentativas(async () => {
+      const resp = await fetch(`${SUPABASE_URL}/rest/v1/ordens`, {
+        method: 'POST',
+        headers: headersSupabase({ 'Prefer': 'return=representation' }),
+        body: JSON.stringify(camposSnake)
+      });
+      if(!resp.ok) throw new Error('Falha ao criar (HTTP ' + resp.status + ')');
+      const linhas = await resp.json();
+      return linhaParaOS(linhas[0]);
+    });
   }
 
-  // salva/remove a foto de uma OS no backend
+  async function atualizarOrdemRemota(id, camposSnake){
+    return chamarComTentativas(async () => {
+      const resp = await fetch(`${SUPABASE_URL}/rest/v1/ordens?id=eq.${id}`, {
+        method: 'PATCH',
+        headers: headersSupabase({ 'Prefer': 'return=minimal' }),
+        body: JSON.stringify(camposSnake)
+      });
+      if(!resp.ok) throw new Error('Falha ao atualizar (HTTP ' + resp.status + ')');
+    });
+  }
+
+  async function excluirOrdemRemota(id){
+    return chamarComTentativas(async () => {
+      const resp = await fetch(`${SUPABASE_URL}/rest/v1/ordens?id=eq.${id}`, {
+        method: 'DELETE',
+        headers: headersSupabase()
+      });
+      if(!resp.ok) throw new Error('Falha ao excluir (HTTP ' + resp.status + ')');
+    });
+  }
+
+  function dataUrlParaBlob(dataUrl){
+    const partes = dataUrl.split(',');
+    const mimeMatch = partes[0].match(/:(.*?);/);
+    const mime = mimeMatch ? mimeMatch[1] : 'image/jpeg';
+    const binario = atob(partes[1]);
+    const bytes = new Uint8Array(binario.length);
+    for(let i = 0; i < binario.length; i++) bytes[i] = binario.charCodeAt(i);
+    return new Blob([bytes], { type: mime });
+  }
+
+  // envia/remove a foto de uma OS. As fotos ficam guardadas no Supabase
+  // Storage (não no navegador), e a URL pública fica salva na própria OS.
   async function salvarFotoDaOS(os, dataUrl){
     try{
       if(dataUrl){
-        await chamarAPIComTentativas({ acao: 'salvarFoto', id: os.id, dataUrl });
+        const blob = dataUrlParaBlob(dataUrl);
+        const nomeArquivo = 'os_' + os.id + '_' + Date.now() + '.jpg';
+        await chamarComTentativas(async () => {
+          const resp = await fetch(`${SUPABASE_URL}/storage/v1/object/fotos/${nomeArquivo}`, {
+            method: 'POST',
+            headers: {
+              'apikey': SUPABASE_ANON_KEY,
+              'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+              'Content-Type': 'image/jpeg',
+            },
+            body: blob
+          });
+          if(!resp.ok) throw new Error('Falha ao enviar foto (HTTP ' + resp.status + ')');
+        });
+        const fotoUrl = `${SUPABASE_URL}/storage/v1/object/public/fotos/${nomeArquivo}`;
+        await atualizarOrdemRemota(os.id, { foto_url: fotoUrl });
+        os.fotoUrl = fotoUrl;
         os.temFoto = true;
       } else if(os.temFoto){
-        await chamarAPIComTentativas({ acao: 'excluirFoto', id: os.id });
+        await atualizarOrdemRemota(os.id, { foto_url: null });
+        os.fotoUrl = null;
         os.temFoto = false;
       }
     }catch(e){
@@ -832,18 +906,11 @@
     trocarBtnId: 'sFotoTrocar', removerBtnId: 'sFotoRemove'
   });
 
-  async function abrirFotoLightbox(id){
+  function abrirFotoLightbox(id){
     const os = ordens.find(o => o.id === id);
     if(!os || !os.temFoto) return;
-    $('#fotoLightboxImg').src = '';
+    $('#fotoLightboxImg').src = os.fotoUrl;
     $('#overlayFoto').classList.add('open');
-    const dataUrl = await obterFoto(id);
-    if(dataUrl){
-      $('#fotoLightboxImg').src = dataUrl;
-    } else {
-      toast('Não foi possível carregar a foto');
-      $('#overlayFoto').classList.remove('open');
-    }
   }
   $('#fecharFoto').addEventListener('click', () => $('#overlayFoto').classList.remove('open'));
   $('#overlayFoto').addEventListener('click', (e) => { if(e.target.id === 'overlayFoto') $('#overlayFoto').classList.remove('open'); });
@@ -870,7 +937,7 @@
     $('#fSolicitante').focus();
   }
 
-  async function abrirModalEditar(id){
+  function abrirModalEditar(id){
     const os = ordens.find(o => o.id === id);
     if(!os) return;
     editandoId = id;
@@ -885,16 +952,25 @@
     $('#fStatus').value = os.status;
     $('#fPrevisao').value = os.previsao || '';
     fotoTecnico.reset();
+    if(os.temFoto) fotoTecnico.set(os.fotoUrl);
     $('#tituloModal').textContent = os.numero + ' — Editar OS';
     $('#overlayForm').classList.add('open');
-    if(os.temFoto){
-      const dataUrl = await obterFoto(id);
-      if(dataUrl) fotoTecnico.set(dataUrl);
-    }
   }
 
   function fecharModalForm(){
     $('#overlayForm').classList.remove('open');
+  }
+
+  function camposParaSnake(campos){
+    const mapa = {
+      centroCusto: 'centro_custo',
+      dataConclusao: 'data_conclusao',
+    };
+    const saida = {};
+    Object.keys(campos).forEach(k => {
+      saida[mapa[k] || k] = campos[k];
+    });
+    return saida;
   }
 
   async function salvarOS(){
@@ -924,7 +1000,7 @@
         } else {
           dataConclusao = null;
         }
-        await chamarAPIComTentativas({ acao: 'atualizar', id: os.id, dados: { ...campos, dataConclusao } });
+        await atualizarOrdemRemota(os.id, camposParaSnake({ ...campos, dataConclusao }));
         Object.assign(os, campos, { dataConclusao });
         await salvarFotoDaOS(os, fotoForm);
         fecharModalForm();
@@ -933,11 +1009,7 @@
       } else {
         const abertura = new Date().toISOString().slice(0,10);
         const dataConclusao = campos.status === 'concluida' ? abertura : null;
-        const resultado = await chamarAPIComTentativas({
-          acao: 'criar',
-          dados: { ...campos, abertura, dataConclusao }
-        });
-        const novaOS = { id: resultado.id, numero: resultado.numero, ...campos, abertura, dataConclusao, temFoto: false };
+        const novaOS = await criarOrdemRemota(camposParaSnake({ ...campos, abertura, dataConclusao }));
         ordens.unshift(novaOS);
         await salvarFotoDaOS(novaOS, fotoForm);
         fecharModalForm();
@@ -955,7 +1027,7 @@
     if(!os) return;
     if(!confirm(`Excluir a ${os.numero} de ${os.solicitante}? Esta ação não pode ser desfeita.`)) return;
     try{
-      await chamarAPIComTentativas({ acao: 'excluir', id });
+      await excluirOrdemRemota(id);
       ordens = ordens.filter(o => o.id !== id);
       renderizar();
       toast('OS excluída');
@@ -975,7 +1047,7 @@
       novaDataConclusao = null;
     }
     try{
-      await chamarAPIComTentativas({ acao: 'atualizar', id, dados: { status: novoStatus, dataConclusao: novaDataConclusao } });
+      await atualizarOrdemRemota(id, { status: novoStatus, data_conclusao: novaDataConclusao });
       os.status = novoStatus;
       os.dataConclusao = novaDataConclusao;
       renderizar();
@@ -991,7 +1063,7 @@
     }
   }
 
-  async function abrirDetalhe(id){
+  function abrirDetalhe(id){
     const os = ordens.find(o => o.id === id);
     if(!os) return;
     const html = `
@@ -1007,22 +1079,12 @@
       <div class="detail-row"><div class="k">Previsão</div><div class="v">${formatDataBR(os.previsao)}</div></div>
       ${os.dataConclusao ? `<div class="detail-row"><div class="k">Concluída em</div><div class="v" style="color:var(--verde-dark);">✅ ${formatDataBR(os.dataConclusao)}</div></div>` : ''}
       ${os.descricao ? `<div class="detail-row" style="display:block;"><div class="k" style="margin-bottom:6px;">Descrição</div><div class="detail-desc">${escapeHTML(os.descricao)}</div></div>` : ''}
-      ${os.temFoto ? `<div class="detail-row" style="display:block;" id="linhaFotoDetalhe"><div class="k" style="margin-bottom:6px;">Foto do serviço</div><div class="foto-carregando">Carregando foto...</div></div>` : ''}
+      ${os.temFoto ? `<div class="detail-row" style="display:block;"><div class="k" style="margin-bottom:6px;">Foto do serviço</div><img src="${os.fotoUrl}" alt="Foto do serviço" style="max-width:100%;border-radius:10px;border:1px solid var(--cinza-200);cursor:pointer;" id="imgDetalheFoto"></div>` : ''}
     `;
     $('#corpoDetalhe').innerHTML = html;
+    const imgDetalhe = $('#imgDetalheFoto');
+    if(imgDetalhe) imgDetalhe.addEventListener('click', () => abrirFotoLightbox(id));
     $('#overlayDetalhe').classList.add('open');
-    if(os.temFoto){
-      const dataUrl = await obterFoto(id);
-      const linha = $('#linhaFotoDetalhe');
-      if(linha){
-        if(dataUrl){
-          linha.innerHTML = `<div class="k" style="margin-bottom:6px;">Foto do serviço</div><img src="${dataUrl}" alt="Foto do serviço" style="max-width:100%;border-radius:10px;border:1px solid var(--cinza-200);cursor:pointer;" id="imgDetalheFoto">`;
-          $('#imgDetalheFoto').addEventListener('click', () => abrirFotoLightbox(id));
-        } else {
-          linha.innerHTML = `<div class="k" style="margin-bottom:6px;">Foto do serviço</div><div style="color:var(--cinza-600);font-size:12.5px;">Não foi possível carregar a foto.</div>`;
-        }
-      }
-    }
   }
 
   function escapeHTML(str){
@@ -1117,13 +1179,13 @@
     corpoTabela.querySelectorAll('.status-select').forEach(sel => {
       sel.addEventListener('change', (e) => {
         e.target.className = 'status-select st-' + e.target.value;
-        mudarStatus(e.target.dataset.id, e.target.value);
+        mudarStatus(Number(e.target.dataset.id), e.target.value);
       });
     });
     // listeners de ações
     corpoTabela.querySelectorAll('[data-acao]').forEach(btn => {
       btn.addEventListener('click', (e) => {
-        const id = e.currentTarget.dataset.id;
+        const id = Number(e.currentTarget.dataset.id);
         const acao = e.currentTarget.dataset.acao;
         if(acao === 'ver') abrirDetalhe(id);
         if(acao === 'editar') abrirModalEditar(id);
@@ -1191,11 +1253,7 @@
     };
     try{
       const abertura = new Date().toISOString().slice(0,10);
-      const resultado = await chamarAPIComTentativas({
-        acao: 'criar',
-        dados: { ...campos, abertura, dataConclusao: null }
-      });
-      const novaOS = { id: resultado.id, numero: resultado.numero, ...campos, abertura, dataConclusao: null, temFoto: false };
+      const novaOS = await criarOrdemRemota(camposParaSnake({ ...campos, abertura, dataConclusao: null }));
       ordens.unshift(novaOS);
       await salvarFotoDaOS(novaOS, fotoForm);
       limparFormSolicitacao();
