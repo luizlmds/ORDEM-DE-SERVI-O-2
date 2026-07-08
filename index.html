@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Sistema de OS · Parente Andrade</title>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <link rel="icon" type="image/png" sizes="32x32" href="data:image/png;base64,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">
 <link rel="icon" type="image/png" sizes="16x16" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAC2ElEQVR4nI1TTWiUVxQ99773fV9mJiYabVKFmBqxoi4U7LSLIlEoxZZKhTKhuKhWCq260b0g6MKNQjeWWArVtlicoFDtPkn/xMhQihC1aBnExr+QmRhn8vne9+51obGNddGzuhwu595zuBf4nyiVS4ae1jrUZ7VcMgBAALBj4LUtUWL2BxcSUShASoyMCBPEfMFNZye/3Vu5CQC3TxUHXu5INk7U/fVFvPR9wgHwjsXFscL8aGXaCEjyBmyfzApeoAJIJvXxRth6viuq1qDV9pzBxLSvjl3JrbB96GNQE2kjEyi0WfeDIPwJlTZifo8YvXFs5ucZJy/PZEeXF6w+mAkEkLu/plN51iMBzBGZIDpw4rNLB07squzzwb5JwB3nghQS03M6RUEehVrq9ZYIht/2t9t4TlIKsOUFpfLqeOdXK+d9t/vCvczrRRsbtobkTiYtxNQU1XPq8blroRb7fNoKNAf7xxwABwBsqEcyAQxxnuFVAQc9v2z76BU9vj6aI6AKkGjPR8fXL2cgz6BtZGkdRKXh1b8TmaZXddVH+WFVEFHFPxMgJngnQqRfsLIAiG3OQIOC8gZTNX94cwe/W8/w66aPR1J9pc8CI9l/LESJsWwIKorMiSrjWvu0P3O6y3QnrdFbmPQbVEEYftJv/1lfYSMin4ZDIFyKDRDH0a09FGRFmz2btNreuzV3Y8nDcJEICoxkcwSgABkiER76Zs/o0Cx98PvXj9iC7Z1xIRDjR4xXwtTZ4sLxycit+uS36VkBUUAIqgK0l8ols6D2F3+Q87Eo9U81fIgNGwd8/ferxTcW5+MfFjp/TculjbN3kI9i5iixhkgeDvYPhi8/rfi1cbK1qyPqntdiTSMN97o/HP2DlDq5NXoJRD0AYDvXdComq2NKSGfq7mfOFX5RBRNBVKjYTMPlIBBAjwEA4vD7g7vpTyo6haur9dmrlp6+579RfgH3PB4DaTpYgZMxXOIAAAAASUVORK5CYII=">
 <style>
@@ -905,6 +906,45 @@
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh2eGd1ZGRpa3VwYmpqYnh0ZGF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzOTI1MzUsImV4cCI6MjA5ODk2ODUzNX0.NTAx-F2PHEqtaUiI3I9A6m0sz4cCTWVWgFlN2GbTQTg';
 
 
+  // ---------- NOTIFICAÇÃO POR E-MAIL AO CRIAR NOVA OS (via EmailJS) ----------
+  // Para funcionar, crie uma conta gratuita em https://www.emailjs.com/ e preencha os 3 valores abaixo:
+  // 1) EMAILJS_PUBLIC_KEY  -> Account > General > Public Key
+  // 2) EMAILJS_SERVICE_ID  -> Email Services > (o serviço que você conectar, ex: Gmail/Outlook)
+  // 3) EMAILJS_TEMPLATE_ID -> Email Templates > (o template que você criar)
+  // O template pode usar as variáveis: {{numero}}, {{solicitante}}, {{equipamento}}, {{centro_custo}},
+  // {{tecnico}}, {{prioridade}}, {{status}}, {{abertura}}, {{descricao}}, {{email_destino}}
+  const EMAILJS_PUBLIC_KEY = '6nTIu_kU-Reu_GXbO';
+  const EMAILJS_SERVICE_ID = 'service_irodub4';
+  const EMAILJS_TEMPLATE_ID = 'template_xpr68ob';
+  const EMAIL_NOTIFICACAO_NOVA_OS = 'luizsantos@parenteandrade.com.br';
+
+  if(window.emailjs && EMAILJS_PUBLIC_KEY && !EMAILJS_PUBLIC_KEY.startsWith('COLOQUE_')){
+    emailjs.init(EMAILJS_PUBLIC_KEY);
+  }
+
+  async function notificarNovaOS(os){
+    if(!window.emailjs) return;
+    if(!EMAILJS_PUBLIC_KEY || EMAILJS_PUBLIC_KEY.startsWith('COLOQUE_')) return;
+    if(!EMAILJS_SERVICE_ID || EMAILJS_SERVICE_ID.startsWith('COLOQUE_')) return;
+    if(!EMAILJS_TEMPLATE_ID || EMAILJS_TEMPLATE_ID.startsWith('COLOQUE_')) return;
+    try{
+      await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+        email_destino: EMAIL_NOTIFICACAO_NOVA_OS,
+        numero: os.numero,
+        solicitante: os.solicitante,
+        equipamento: os.equipamento,
+        centro_custo: os.centroCusto || '—',
+        tecnico: os.tecnico || '—',
+        prioridade: prioridadeLabel[os.prioridade] || os.prioridade,
+        status: statusLabel[os.status] || os.status,
+        abertura: formatDataBR(os.abertura),
+        descricao: os.descricao || '—',
+      });
+    }catch(e){
+      console.error('Não foi possível enviar o e-mail de notificação da nova OS', e);
+    }
+  }
+
   let ordens = [];
   let editandoId = null;
 
@@ -1458,6 +1498,7 @@
         fecharModalForm();
         renderizar();
         toast('OS ' + novaOS.numero + ' criada com sucesso');
+        notificarNovaOS(novaOS);
       }
     }catch(e){
       console.error('Erro ao salvar OS', e);
@@ -1947,6 +1988,7 @@
       await salvarFotoDaOS(novaOS, fotoForm);
       limparFormSolicitacao();
       toast('Solicitação ' + novaOS.numero + ' enviada com sucesso!');
+      notificarNovaOS(novaOS);
       mostrarView('menu');
     }catch(e){
       console.error('Erro ao enviar solicitação', e);
