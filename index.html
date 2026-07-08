@@ -136,7 +136,7 @@
   /* ---------- STATS ---------- */
   .stats{
     display:grid;
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(6, 1fr);
     gap:14px;
     padding: 20px 24px 4px 24px;
   }
@@ -152,6 +152,7 @@
   .stat-card.total{ border-left-color: var(--preto); }
   .stat-card.aberta{ border-left-color: var(--laranja); }
   .stat-card.andamento{ border-left-color: var(--azul); }
+  .stat-card.concluida-parcial{ border-left-color: #d4a017; }
   .stat-card.concluida{ border-left-color: var(--verde); }
   .stat-card.cancelada{ border-left-color: var(--vermelho); }
 
@@ -232,12 +233,14 @@
   }
   .status-select.st-aberta{ background:var(--laranja-light); color:var(--laranja-dark); }
   .status-select.st-andamento{ background:var(--azul-light); color:var(--azul); }
+  .status-select.st-concluida_parcial{ background:#fff3cd; color:#8a6d1e; }
   .status-select.st-concluida{ background:var(--verde-light); color:var(--verde-dark); }
   .status-select.st-cancelada{ background:var(--vermelho-light); color:var(--vermelho); }
 
   .badge-status{ display:inline-block; padding:5px 12px; border-radius:20px; font-size:11.5px; font-weight:700; }
   .badge-status.st-aberta{ background:var(--laranja-light); color:var(--laranja-dark); }
   .badge-status.st-andamento{ background:var(--azul-light); color:var(--azul); }
+  .badge-status.st-concluida_parcial{ background:#fff3cd; color:#8a6d1e; }
   .badge-status.st-concluida{ background:var(--verde-light); color:var(--verde-dark); }
   .badge-status.st-cancelada{ background:var(--vermelho-light); color:var(--vermelho); }
 
@@ -479,9 +482,7 @@
     </div>
   </div>
   <div class="header-user">
-    <span id="headerSaudacao"></span>
-    <button class="sair" id="btnSair" title="Sair" style="display:none;">🚪</button>
-    <button class="btn-secundario btn-header-toggle" id="btnToggleView" style="display:none;">🔧 Área do Técnico</button>
+    <button class="btn-secundario btn-header-toggle" id="btnToggleView">🔧 Área do Técnico</button>
   </div>
 </header>
 
@@ -493,32 +494,12 @@
   <span class="atual" id="breadcrumbAtual">Visualização</span>
 </div>
 
-<!-- VIEW: LOGIN (E-MAIL CORPORATIVO) -->
-<main class="view-solicitacao" id="viewLogin">
-  <div class="solicitacao-card" style="max-width:400px;">
-    <div class="solicitacao-topo">
-      <h2>Acesso ao Sistema</h2>
-      <p>Entre com seu e-mail corporativo para continuar.</p>
-    </div>
-    <div class="form-grid">
-      <div class="field full">
-        <label>E-mail corporativo <span class="req">*</span></label>
-        <input type="email" id="loginEmailInput" required placeholder="seunome@parenteandrade.com.br">
-      </div>
-      <div id="loginErro" style="color:var(--vermelho); font-size:12.5px; display:none;">Use seu e-mail corporativo (@parenteandrade.com.br).</div>
-    </div>
-    <div class="solicitacao-rodape">
-      <button class="btn-primario" id="btnEntrarLogin">Entrar</button>
-    </div>
-  </div>
-</main>
-
 <!-- VIEW: MENU DO COLABORADOR (APÓS LOGIN) -->
-<main class="view-solicitacao" id="viewMenu" style="display:none;">
+<main class="view-solicitacao" id="viewMenu">
   <div class="solicitacao-card" style="max-width:480px;">
     <div class="solicitacao-topo">
       <h2>Bem-vindo(a)</h2>
-      <p class="menu-saudacao" id="menuEmailTexto"></p>
+      <p class="menu-saudacao">Sistema de Ordens de Serviço da Parente Andrade</p>
     </div>
     <div class="menu-cards">
       <button type="button" class="btn-menu-card" id="btnIrNovaOS">
@@ -543,6 +524,14 @@
     <button class="btn-secundario" id="btnVoltarMenuMinhasOS">← Voltar ao menu</button>
     <button class="btn-secundario" id="btnAtualizarMinhasOS">🔄 Atualizar</button>
   </div>
+  <div class="manutencao-card" style="margin:20px 24px 0 24px;">
+    <h3>Buscar minhas solicitações</h3>
+    <p class="manutencao-desc">Digite o e-mail corporativo usado na abertura da OS para ver o status das suas solicitações.</p>
+    <div class="manutencao-form">
+      <input type="email" id="buscaEmailMinhasOS" placeholder="seunome@parenteandrade.com.br">
+      <button type="button" class="btn-primario" id="btnBuscarMinhasOS">Buscar</button>
+    </div>
+  </div>
   <div class="table-wrap">
     <table id="tabelaMinhasOS">
       <thead>
@@ -560,8 +549,8 @@
     </table>
     <div class="empty-state" id="estadoVazioMinhasOS" style="display:none;">
       <div class="mark">OS</div>
-      <h3>Você ainda não enviou nenhuma solicitação</h3>
-      <p>Suas solicitações vão aparecer aqui assim que forem enviadas.</p>
+      <h3>Nenhuma solicitação encontrada</h3>
+      <p>Digite o e-mail corporativo acima e clique em "Buscar" para ver suas solicitações.</p>
     </div>
   </div>
 </main>
@@ -579,8 +568,8 @@
         <input type="text" id="sSolicitante" required placeholder="Seu nome completo">
       </div>
       <div class="field full">
-        <label>E-mail</label>
-        <input type="email" id="sEmailSolicitante" readonly style="background:var(--cinza-100); color:var(--cinza-600); cursor:not-allowed;">
+        <label>E-mail corporativo <span class="req">*</span></label>
+        <input type="email" id="sEmailSolicitante" required placeholder="seunome@parenteandrade.com.br">
       </div>
       <div class="field">
         <label>Telefone</label>
@@ -643,11 +632,19 @@
 <main class="view-tecnico" id="viewTecnico" style="display:none;">
 
 <div class="tecnico-topo">
-  <div style="display:flex; gap:10px; flex-wrap:wrap;">
-    <button class="btn-nova" id="btnNovaOS">+ Nova OS</button>
-    <button class="btn-secundario" id="btnAtualizarTecnico">🔄 Atualizar</button>
-    <button class="btn-secundario" id="btnIrManutencao">⚙️ Manutenção</button>
-    <button class="btn-secundario" id="btnEmitirRelatorio">🖨️ Emitir Relatório</button>
+  <div style="display:flex; gap:14px; flex-wrap:wrap; align-items:center;">
+    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+      <button class="btn-nova" id="btnNovaOS">+ Nova OS</button>
+      <button class="btn-secundario" id="btnAtualizarTecnico">🔄 Atualizar</button>
+      <button class="btn-secundario" id="btnIrManutencao">⚙️ Manutenção</button>
+    </div>
+    <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+      <label style="font-size:12.5px; color:var(--cinza-600); font-weight:700;">Período do relatório:</label>
+      <input type="date" id="relatorioDataInicio" style="padding:8px 10px; border:1px solid var(--cinza-200); border-radius:8px; font-size:13px;">
+      <span style="color:var(--cinza-600); font-size:13px;">até</span>
+      <input type="date" id="relatorioDataFim" style="padding:8px 10px; border:1px solid var(--cinza-200); border-radius:8px; font-size:13px;">
+      <button class="btn-secundario" id="btnEmitirRelatorio">🖨️ Emitir Relatório</button>
+    </div>
   </div>
 </div>
 
@@ -663,6 +660,10 @@
   <div class="stat-card andamento">
     <div class="num" id="statAndamento">0</div>
     <div class="label">Em andamento</div>
+  </div>
+  <div class="stat-card concluida-parcial">
+    <div class="num" id="statConcluidaParcial">0</div>
+    <div class="label">Concluídas parcialmente</div>
   </div>
   <div class="stat-card concluida">
     <div class="num" id="statConcluida">0</div>
@@ -680,6 +681,7 @@
     <option value="">Todos os status</option>
     <option value="aberta">Aberta</option>
     <option value="andamento">Em andamento</option>
+    <option value="concluida_parcial">Concluída parcialmente</option>
     <option value="concluida">Concluída</option>
     <option value="cancelada">Cancelada</option>
   </select>
@@ -789,6 +791,10 @@
             <textarea id="fDescricao" placeholder="Detalhe o que precisa ser feito..."></textarea>
           </div>
           <div class="field full">
+            <label>Observação / Mensagem do Técnico</label>
+            <textarea id="fObservacaoTecnico" placeholder="Deixe uma observação sobre o andamento ou a conclusão do serviço..."></textarea>
+          </div>
+          <div class="field full">
             <label>Foto do serviço</label>
             <div class="foto-upload" id="fotoUpload">
               <input type="file" id="fFoto" accept="image/*" capture="environment" style="display:none;">
@@ -819,6 +825,7 @@
             <select id="fStatus">
               <option value="aberta" selected>Aberta</option>
               <option value="andamento">Em andamento</option>
+              <option value="concluida_parcial">Concluída parcialmente</option>
               <option value="concluida">Concluída</option>
               <option value="cancelada">Cancelada</option>
             </select>
@@ -916,7 +923,7 @@
   const EMAILJS_PUBLIC_KEY = '6nTIu_kU-Reu_GXbO';
   const EMAILJS_SERVICE_ID = 'service_dafh3j8';
   const EMAILJS_TEMPLATE_ID = 'template_xpr68ob';
-  const EMAIL_NOTIFICACAO_NOVA_OS = 'luizsantos@parenteandrade.com.br';
+  const EMAIL_NOTIFICACAO_NOVA_OS = 'priscillacosta.contratos@parenteandrade.com.br';
 
   if(window.emailjs && EMAILJS_PUBLIC_KEY && !EMAILJS_PUBLIC_KEY.startsWith('COLOQUE_')){
     emailjs.init(EMAILJS_PUBLIC_KEY);
@@ -1134,7 +1141,7 @@
     return d ? `${d}/${m}/${y}` : iso;
   }
 
-  const statusLabel = { aberta:'Aberta', andamento:'Em andamento', concluida:'Concluída', cancelada:'Cancelada' };
+  const statusLabel = { aberta:'Aberta', andamento:'Em andamento', concluida_parcial:'Concluída parcialmente', concluida:'Concluída', cancelada:'Cancelada' };
   const prioridadeLabel = { baixa:'Baixa', media:'Média', alta:'Alta', urgente:'Urgente' };
 
   function configuradoOk(){
@@ -1162,6 +1169,7 @@
       tecnico: linha.tecnico || '',
       equipamento: linha.equipamento,
       descricao: linha.descricao || '',
+      observacaoTecnico: linha.observacao_tecnico || '',
       prioridade: linha.prioridade,
       status: linha.status,
       abertura: linha.abertura,
@@ -1395,6 +1403,7 @@
     $('#fTecnico').value = '';
     $('#fEquipamento').value = '';
     $('#fDescricao').value = '';
+    $('#fObservacaoTecnico').value = '';
     $('#fPrioridade').value = 'media';
     $('#fStatus').value = 'aberta';
     $('#fPrevisao').value = '';
@@ -1410,7 +1419,7 @@
     $('#fSolicitante').focus();
   }
 
-  function abrirModalEditar(id){
+  function abrirModalEditar(id, focarObservacao){
     const os = ordens.find(o => o.id === id);
     if(!os) return;
     editandoId = id;
@@ -1422,6 +1431,7 @@
     definirValorSelect($('#fTecnico'), os.tecnico);
     $('#fEquipamento').value = os.equipamento;
     $('#fDescricao').value = os.descricao || '';
+    $('#fObservacaoTecnico').value = os.observacaoTecnico || '';
     $('#fPrioridade').value = os.prioridade;
     $('#fStatus').value = os.status;
     $('#fPrevisao').value = os.previsao || '';
@@ -1429,6 +1439,15 @@
     if(os.temFoto) fotoTecnico.set(os.fotoUrl);
     $('#tituloModal').textContent = os.numero + ' — Editar OS';
     $('#overlayForm').classList.add('open');
+    if(focarObservacao){
+      setTimeout(() => {
+        const campo = $('#fObservacaoTecnico');
+        campo.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        campo.focus();
+        campo.style.outline = '2px solid var(--laranja)';
+        setTimeout(() => { campo.style.outline = ''; }, 2000);
+      }, 150);
+    }
   }
 
   function fecharModalForm(){
@@ -1440,6 +1459,7 @@
       centroCusto: 'centro_custo',
       dataConclusao: 'data_conclusao',
       emailSolicitante: 'email_solicitante',
+      observacaoTecnico: 'observacao_tecnico',
     };
     const camposData = ['abertura', 'previsao', 'data_conclusao'];
     const saida = {};
@@ -1470,6 +1490,7 @@
       centroCusto: $('#fCentroCusto').value.trim(),
       tecnico: $('#fTecnico').value.trim(),
       descricao: $('#fDescricao').value.trim(),
+      observacaoTecnico: $('#fObservacaoTecnico').value.trim(),
       prioridade: $('#fPrioridade').value,
       status: $('#fStatus').value,
       previsao: $('#fPrevisao').value,
@@ -1564,6 +1585,7 @@
       <div class="detail-row"><div class="k">Previsão</div><div class="v">${formatDataBR(os.previsao)}</div></div>
       ${os.dataConclusao ? `<div class="detail-row"><div class="k">Concluída em</div><div class="v" style="color:var(--verde-dark);">✅ ${formatDataBR(os.dataConclusao)}</div></div>` : ''}
       ${os.descricao ? `<div class="detail-row full"><div class="k">Descrição</div><div class="detail-desc">${escapeHTML(os.descricao)}</div></div>` : ''}
+      ${os.observacaoTecnico ? `<div class="detail-row full"><div class="k">Observação do Técnico</div><div class="detail-desc">${escapeHTML(os.observacaoTecnico)}</div></div>` : ''}
       ${os.temFoto ? `<div class="detail-row full"><div class="k">Foto do serviço</div><img src="${os.fotoUrl}" alt="Foto do serviço" style="max-width:100%;border-radius:10px;border:1px solid var(--cinza-200);cursor:pointer;" id="imgDetalheFoto"></div>` : ''}
     </div>
     `;
@@ -1601,6 +1623,7 @@
     $('#statTotal').textContent = ordens.length;
     $('#statAberta').textContent = ordens.filter(o=>o.status==='aberta').length;
     $('#statAndamento').textContent = ordens.filter(o=>o.status==='andamento').length;
+    $('#statConcluidaParcial').textContent = ordens.filter(o=>o.status==='concluida_parcial').length;
     $('#statConcluida').textContent = ordens.filter(o=>o.status==='concluida').length;
     $('#statCancelada').textContent = ordens.filter(o=>o.status==='cancelada').length;
 
@@ -1641,6 +1664,7 @@
           <select class="status-select st-${os.status}" data-id="${os.id}">
             <option value="aberta" ${os.status==='aberta'?'selected':''}>Aberta</option>
             <option value="andamento" ${os.status==='andamento'?'selected':''}>Em andamento</option>
+            <option value="concluida_parcial" ${os.status==='concluida_parcial'?'selected':''}>Concluída parcialmente</option>
             <option value="concluida" ${os.status==='concluida'?'selected':''}>Concluída</option>
             <option value="cancelada" ${os.status==='cancelada'?'selected':''}>Cancelada</option>
           </select>
@@ -1654,6 +1678,7 @@
           <div class="acoes">
             <button class="icon-btn" title="Ver detalhes" data-acao="ver" data-id="${os.id}">👁</button>
             <button class="icon-btn" title="Editar" data-acao="editar" data-id="${os.id}">✎</button>
+            <button class="icon-btn" title="Observação e foto" data-acao="observacao" data-id="${os.id}">💬</button>
             <button class="icon-btn danger" title="Excluir" data-acao="excluir" data-id="${os.id}">🗑</button>
           </div>
         </td>
@@ -1675,6 +1700,7 @@
         const acao = e.currentTarget.dataset.acao;
         if(acao === 'ver') abrirDetalhe(id);
         if(acao === 'editar') abrirModalEditar(id);
+        if(acao === 'observacao') abrirModalEditar(id, true);
         if(acao === 'excluir') excluirOS(id);
         if(acao === 'foto') abrirFotoLightbox(id);
         if(acao === 'concluir'){
@@ -1689,11 +1715,22 @@
 
   // ---------- EMISSÃO DE RELATÓRIO (PAPEL TIMBRADO) ----------
   function emitirRelatorio(){
-    const lista = aplicarFiltros(ordens);
+    const dataInicio = $('#relatorioDataInicio').value;
+    const dataFim = $('#relatorioDataFim').value;
+    if(dataInicio && dataFim && dataInicio > dataFim){
+      toast('A data de início não pode ser depois da data de fim');
+      return;
+    }
+    let lista = aplicarFiltros(ordens);
+    if(dataInicio) lista = lista.filter(os => os.abertura && os.abertura >= dataInicio);
+    if(dataFim) lista = lista.filter(os => os.abertura && os.abertura <= dataFim);
     const logoEl = document.querySelector('.brand img');
     const logoSrc = logoEl ? logoEl.src : '';
     const agora = new Date();
     const dataEmissao = agora.toLocaleDateString('pt-BR') + ' às ' + agora.toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' });
+    const periodoTexto = (dataInicio || dataFim)
+      ? ('Período: ' + (dataInicio ? formatDataBR(dataInicio) : 'início') + ' até ' + (dataFim ? formatDataBR(dataFim) : 'hoje'))
+      : 'Período: todas as OS';
 
     const linhas = lista.map(os => `
       <tr>
@@ -1744,6 +1781,7 @@
   </header>
   <div class="meta">
     <span>Emitido em: ${dataEmissao}</span>
+    <span>${periodoTexto}</span>
     <span>Total de registros: ${lista.length}</span>
   </div>
   <table>
@@ -1777,59 +1815,10 @@
     setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
   }
   const DOMINIO_PERMITIDO = '@parenteandrade.com.br';
-  const CHAVE_SESSAO_LOGIN = 'os_login_email';
+  const CHAVE_ULTIMO_EMAIL = 'os_ultimo_email';
 
   function emailValido(email){
     return email.trim().toLowerCase().endsWith(DOMINIO_PERMITIDO);
-  }
-
-  function entrarComEmail(){
-    const email = $('#loginEmailInput').value.trim();
-    if(!emailValido(email)){
-      $('#loginErro').style.display = 'block';
-      $('#loginEmailInput').select();
-      return;
-    }
-    localStorage.setItem(CHAVE_SESSAO_LOGIN, email.toLowerCase());
-    $('#viewLogin').style.display = 'none';
-    $('#btnToggleView').style.display = '';
-    $('#btnSair').style.display = '';
-    mostrarView('menu');
-  }
-
-  $('#btnEntrarLogin').addEventListener('click', entrarComEmail);
-  $('#loginEmailInput').addEventListener('keydown', (e) => {
-    if(e.key === 'Enter'){ e.preventDefault(); entrarComEmail(); }
-  });
-  $('#loginEmailInput').addEventListener('input', () => {
-    $('#loginErro').style.display = 'none';
-  });
-
-  function sair(){
-    if(!confirm('Deseja realmente sair do sistema?')) return;
-    localStorage.removeItem(CHAVE_SESSAO_LOGIN);
-    $('#btnToggleView').style.display = 'none';
-    $('#btnSair').style.display = 'none';
-    $('#viewMenu').style.display = 'none';
-    $('#viewSolicitacao').style.display = 'none';
-    $('#viewMinhasOS').style.display = 'none';
-    $('#viewTecnico').style.display = 'none';
-    $('#viewManutencao').style.display = 'none';
-    $('#breadcrumbBar').style.display = 'none';
-    $('#loginEmailInput').value = '';
-    $('#viewLogin').style.display = 'flex';
-  }
-  $('#btnSair').addEventListener('click', sair);
-
-  function conferirLoginExistente(){
-    const emailSalvo = localStorage.getItem(CHAVE_SESSAO_LOGIN);
-    if(emailSalvo && emailValido(emailSalvo)){
-      $('#viewLogin').style.display = 'none';
-      $('#btnToggleView').style.display = '';
-      $('#btnSair').style.display = '';
-      return true;
-    }
-    return false;
   }
 
   // ---------- ALTERNÂNCIA DE VIEWS: MENU x SOLICITAÇÃO x MINHAS OS x ÁREA DO TÉCNICO ----------
@@ -1853,18 +1842,15 @@
       bar.style.display = 'flex';
       $('#breadcrumbAtual').textContent = rotulos[view] || '';
     }
-    const emailAtual = localStorage.getItem(CHAVE_SESSAO_LOGIN) || '';
-    $('#headerSaudacao').textContent = emailAtual ? ('Olá, ' + emailAtual.split('@')[0]) : '';
-    if(view === 'menu'){
-      const email = localStorage.getItem(CHAVE_SESSAO_LOGIN) || '';
-      $('#menuEmailTexto').textContent = email ? ('Conectado como ' + email) : '';
-    }
     if(view === 'solicitacao'){
-      $('#sEmailSolicitante').value = localStorage.getItem(CHAVE_SESSAO_LOGIN) || '';
+      $('#sEmailSolicitante').value = localStorage.getItem(CHAVE_ULTIMO_EMAIL) || '';
       popularSelects();
     }
     if(view === 'tecnico') renderizar();
-    if(view === 'minhasOS') renderizarMinhasOS();
+    if(view === 'minhasOS'){
+      $('#buscaEmailMinhasOS').value = localStorage.getItem(CHAVE_ULTIMO_EMAIL) || '';
+      renderizarMinhasOS();
+    }
     if(view === 'manutencao') renderizarManutencao();
   }
 
@@ -1886,8 +1872,10 @@
   $('#btnVoltarMenuSolicitacao').addEventListener('click', () => mostrarView('menu'));
 
   function renderizarMinhasOS(){
-    const emailAtual = (localStorage.getItem(CHAVE_SESSAO_LOGIN) || '').toLowerCase();
-    const minhas = ordens.filter(o => (o.emailSolicitante || '').toLowerCase() === emailAtual);
+    const emailBusca = ($('#buscaEmailMinhasOS').value || '').trim().toLowerCase();
+    const minhas = emailBusca
+      ? ordens.filter(o => (o.emailSolicitante || '').toLowerCase() === emailBusca)
+      : [];
     const corpo = $('#corpoMinhasOS');
     corpo.innerHTML = '';
     const semResultado = minhas.length === 0;
@@ -1912,6 +1900,20 @@
       btn.addEventListener('click', (e) => abrirDetalhe(Number(e.currentTarget.dataset.id)));
     });
   }
+
+  function buscarMinhasOS(){
+    const email = $('#buscaEmailMinhasOS').value.trim();
+    if(!emailValido(email)){
+      toast('Digite um e-mail corporativo válido (@parenteandrade.com.br)');
+      return;
+    }
+    localStorage.setItem(CHAVE_ULTIMO_EMAIL, email.toLowerCase());
+    renderizarMinhasOS();
+  }
+  $('#btnBuscarMinhasOS').addEventListener('click', buscarMinhasOS);
+  $('#buscaEmailMinhasOS').addEventListener('keydown', (e) => {
+    if(e.key === 'Enter'){ e.preventDefault(); buscarMinhasOS(); }
+  });
 
   function abrirModalSenha(){
     $('#senhaTecnicoInput').value = '';
@@ -1965,8 +1967,14 @@
   async function enviarSolicitacao(){
     const solicitante = $('#sSolicitante').value.trim();
     const equipamento = $('#sEquipamento').value.trim();
-    if(!solicitante || !equipamento){
+    const emailSolicitante = $('#sEmailSolicitante').value.trim();
+    if(!solicitante || !equipamento || !emailSolicitante){
       toast('Preencha os campos obrigatórios');
+      return;
+    }
+    if(!emailValido(emailSolicitante)){
+      toast('Digite um e-mail corporativo válido (@parenteandrade.com.br)');
+      $('#sEmailSolicitante').focus();
       return;
     }
     const fotoForm = fotoSolic.get();
@@ -1979,13 +1987,14 @@
       prioridade: $('#sPrioridade').value,
       status: 'aberta',
       previsao: '',
-      emailSolicitante: localStorage.getItem(CHAVE_SESSAO_LOGIN) || '',
+      emailSolicitante: emailSolicitante.toLowerCase(),
     };
     try{
       const abertura = new Date().toISOString().slice(0,10);
       const novaOS = await criarOrdemRemota(camposParaSnake({ ...campos, abertura, dataConclusao: null }));
       ordens.unshift(novaOS);
       await salvarFotoDaOS(novaOS, fotoForm);
+      localStorage.setItem(CHAVE_ULTIMO_EMAIL, emailSolicitante.toLowerCase());
       limparFormSolicitacao();
       toast('Solicitação ' + novaOS.numero + ' enviada com sucesso!');
       notificarNovaOS(novaOS);
@@ -2026,9 +2035,7 @@
   aplicarMascaraTelefone($('#fTelefone'));
   popularSelects();
 
-  if(conferirLoginExistente()){
-    mostrarView('menu');
-  }
+  mostrarView('menu');
   carregar();
 })();
 </script>
