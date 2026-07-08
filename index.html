@@ -30,7 +30,7 @@
   }
 
   *{box-sizing:border-box;}
-  html,body{margin:0;padding:0;}
+  html,body{margin:0;padding:0; overflow-x:hidden; max-width:100%;}
   body{
     font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     background: var(--cinza-100);
@@ -120,8 +120,8 @@
   .solicitacao-rodape .btn-primario{ padding:12px 26px; font-size:14px; }
 
   .tecnico-topo{
-    display:flex; justify-content:space-between; align-items:center;
-    padding: 20px 24px 0 24px;
+    display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center;
+    padding: 20px 24px 0 24px; row-gap:12px;
   }
   .tecnico-topo::before{
     content:"Área do Técnico"; font-size:15px; font-weight:800; color:var(--preto);
@@ -131,6 +131,28 @@
   }
   #viewMinhasOS .tecnico-topo::before{
     content:"Acompanhar minha OS";
+  }
+  .tecnico-topo-acoes{
+    display:flex; gap:14px; flex-wrap:wrap; align-items:center; max-width:100%;
+  }
+  .tecnico-topo-botoes{ display:flex; gap:10px; flex-wrap:wrap; }
+  .periodo-relatorio{
+    display:flex; gap:8px; flex-wrap:wrap; align-items:center; max-width:100%;
+  }
+  .periodo-relatorio label{
+    font-size:12.5px; color:var(--cinza-600); font-weight:700; white-space:nowrap;
+  }
+  .periodo-relatorio span{ color:var(--cinza-600); font-size:13px; }
+  .periodo-relatorio input[type="date"]{
+    padding:8px 10px; border:1px solid var(--cinza-200); border-radius:8px; font-size:13px;
+    width:150px; max-width:100%; min-width:0;
+  }
+  @media (max-width: 640px){
+    .tecnico-topo::before{ width:100%; }
+    .tecnico-topo-acoes{ width:100%; flex-direction:column; align-items:flex-start; }
+    .tecnico-topo-botoes{ width:100%; }
+    .periodo-relatorio{ width:100%; }
+    .periodo-relatorio input[type="date"]{ width:140px; }
   }
 
   /* ---------- STATS ---------- */
@@ -647,17 +669,17 @@
 <main class="view-tecnico" id="viewTecnico" style="display:none;">
 
 <div class="tecnico-topo">
-  <div style="display:flex; gap:14px; flex-wrap:wrap; align-items:center;">
-    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+  <div class="tecnico-topo-acoes">
+    <div class="tecnico-topo-botoes">
       <button class="btn-nova" id="btnNovaOS">+ Nova OS</button>
       <button class="btn-secundario" id="btnAtualizarTecnico">🔄 Atualizar</button>
       <button class="btn-secundario" id="btnIrManutencao">⚙️ Manutenção</button>
     </div>
-    <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
-      <label style="font-size:12.5px; color:var(--cinza-600); font-weight:700;">Período do relatório:</label>
-      <input type="date" id="relatorioDataInicio" style="padding:8px 10px; border:1px solid var(--cinza-200); border-radius:8px; font-size:13px;">
-      <span style="color:var(--cinza-600); font-size:13px;">até</span>
-      <input type="date" id="relatorioDataFim" style="padding:8px 10px; border:1px solid var(--cinza-200); border-radius:8px; font-size:13px;">
+    <div class="periodo-relatorio">
+      <label>Período do relatório:</label>
+      <input type="date" id="relatorioDataInicio">
+      <span>até</span>
+      <input type="date" id="relatorioDataFim">
       <button class="btn-secundario" id="btnEmitirRelatorio">🖨️ Emitir Relatório</button>
     </div>
   </div>
