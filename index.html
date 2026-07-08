@@ -448,8 +448,16 @@
     table thead{ display:none; }
     table, tbody, tr, td{ display:block; width:100%; }
     tbody tr{ border-bottom:8px solid var(--cinza-100); padding:8px 0; }
-    tbody td{ display:flex; justify-content:center; align-items:center; border-bottom:none; padding:6px 14px;}
-    tbody td::before{ content: attr(data-label); font-weight:700; color:var(--cinza-600); font-size:11px; text-transform:uppercase;}
+    tbody td{
+      display:flex; flex-direction:column; align-items:flex-start; justify-content:center;
+      border-bottom:none; padding:8px 14px; text-align:left !important; gap:2px;
+      color:var(--verde-dark) !important; font-weight:700; font-size:14px;
+    }
+    tbody td::before{
+      content: attr(data-label); font-weight:800; color:var(--preto); font-size:11px;
+      text-transform:uppercase; letter-spacing:.3px;
+    }
+    tbody td .acoes{ justify-content:flex-start; }
   }
 
   /* ===== CENTRALIZAÇÃO GERAL ===== */
