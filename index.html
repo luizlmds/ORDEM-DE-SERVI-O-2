@@ -330,7 +330,8 @@
   }
   .form-grid .full{ grid-column: 1 / -1; }
   .field label{
-    display:block; font-size:12px; font-weight:700; margin-bottom:6px; color:var(--cinza-900);
+    display:inline-block; font-size:13px; font-weight:800; margin-bottom:6px;
+    color:var(--preto);
   }
   .field input, .field select, .field textarea{
     width:100%; padding:10px 12px; border:1px solid var(--cinza-200);
@@ -466,6 +467,7 @@
   .solicitacao-rodape{ justify-content:center; }
   .detail-row{ align-items:center; }
   .form-grid .field{ display:flex; flex-direction:column; align-items:center; }
+  .form-grid .field.alinhar-esquerda{ align-items:flex-start; }
   .field input, .field select, .field textarea{ text-align:center; }
   .foto-upload{ align-items:center; }
   .foto-acoes{ align-items:center; }
@@ -563,11 +565,11 @@
       <h2>Abrir nova Ordem de Serviço</h2>
     </div>
     <div class="form-grid">
-      <div class="field full">
+      <div class="field full alinhar-esquerda">
         <label>Nome do solicitante <span class="req">*</span></label>
         <input type="text" id="sSolicitante" required placeholder="Seu nome completo">
       </div>
-      <div class="field full">
+      <div class="field full alinhar-esquerda">
         <label>E-mail corporativo <span class="req">*</span></label>
         <input type="email" id="sEmailSolicitante" required placeholder="seunome@parenteandrade.com.br">
       </div>
@@ -587,11 +589,11 @@
           <option value="">Selecione o técnico</option>
         </select>
       </div>
-      <div class="field full">
+      <div class="field full alinhar-esquerda">
         <label>Equipamento / Serviço <span class="req">*</span></label>
         <input type="text" id="sEquipamento" required placeholder="Ex: Notebook Dell, Instalação elétrica...">
       </div>
-      <div class="field full">
+      <div class="field full alinhar-esquerda">
         <label>Descrição do problema / serviço</label>
         <textarea id="sDescricao" placeholder="Detalhe o que precisa ser feito..."></textarea>
       </div>
